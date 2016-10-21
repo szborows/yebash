@@ -1,10 +1,11 @@
+project(yebash CXX)
 cmake_minimum_required(VERSION 3.0)
 
-project(yebash C CXX)
+set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -Werror -Wextra")
+set(CMAKE_EXE_LINKER_FLAGS "-shared -fPIC")
 
-add_definitions(-Wl,-shared -Wl,-fPIC)
+set(SOURCES
+    src/yebash.cpp)
 
-add_library(${PROJECT_NAME} SHARED src/yebash.c)
-
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} -ldl)
-

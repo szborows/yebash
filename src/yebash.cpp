@@ -1,13 +1,12 @@
-#define _GNU_SOURCE
 #include <dlfcn.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-static ssize_t (*real_read)(int fd, void *buf, size_t count) = NULL;
+typedef ssize_t (*ReadSignature)(int, void*, size_t);
+static ReadSignature real_read = nullptr;
 
 static char __line[1024];
 static int __line_index = 0;
@@ -91,7 +90,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     ssize_t ret;
 
     if (!real_read)
-        real_read = dlsym(RTLD_NEXT, "read");
+        real_read = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
     ret = real_read(fd, buf, count);
 
     if (fd == 0)
