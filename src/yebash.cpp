@@ -15,8 +15,6 @@
 
 typedef ssize_t (*ReadSignature)(int, void*, size_t);
 
-thread_local ReadSignature realRead = NULL;
-
 thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
@@ -137,6 +135,7 @@ static unsigned char yebash(unsigned char c) {
 ssize_t read(int fd, void *buf, size_t count) {
 
     ssize_t returnValue;
+    static thread_local ReadSignature realRead = nullptr;
 
     if (!realRead)
         realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
