@@ -4,12 +4,14 @@
 #include <cstdlib>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <array>
 
 typedef ssize_t (*ReadSignature)(int, void*, size_t);
 
 // TODO: per-process memory?
-static char __line[1024];
-static int __line_index = 0;
+using LineBuffer = std::array<char, 1024>;
+static LineBuffer line_buffer;
+static auto line_buffer_pos = line_buffer.begin();
 
 #define cursor_forward(x) printf("\033[%dC", (x))
 #define cursor_backward(x) printf("\033[%dD", (x))
@@ -58,21 +60,22 @@ void interactive_completion(unsigned char c) {
 
     switch (c) {
         case 0xd: // newline
-            __line_index = 0;
-            memset(__line, 0, 1024);
+            line_buffer_pos = line_buffer.begin();
+            std::fill(std::begin(line_buffer), std::end(line_buffer), 0);
             memset(buffer, 0, 2048);
             break;
 
         case 0x7f: // backspace
-            if (__line_index > 0)
-                __line[--__line_index] = 0;
+            if (line_buffer_pos != line_buffer.begin()) {
+                *(--line_buffer_pos) = 0;
+            }
             break;
 
         default:
-            __line[__line_index++] = c;
-            __line[__line_index] = 0;
-            complete_from_history(__line, buffer);
-            if (strlen(buffer) > strlen(__line)) {
+            *(++line_buffer_pos) = c;
+            *(line_buffer_pos) = 0;
+            complete_from_history(line_buffer.data(), buffer);
+            if (strlen(buffer) > strlen(line_buffer.data())) {
                 cursor_forward(1);
                 printf("\e[1;30m%s\e[0m", buffer);
                 cursor_backward((int)strlen(buffer) + 1);
