@@ -67,10 +67,21 @@ std::string findCompletion(std::vector<std::string>::iterator start, const std::
 
 }
 
+void clearTerminalLine() {
+    // TODO: get info about terminal width and current cursor position
+    // and fix below loops
+    for (int i = 0; i < 30; i++)
+        printf(" ");
+    for (int i = 0; i < 30; i++)
+        cursor_backward(1);
+}
+
 void printCompletion(std::vector<std::string>::iterator startIterator) {
 
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
+
+    clearTerminalLine();
 
     cursor_forward(1);
     printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
@@ -138,7 +149,7 @@ static unsigned char yebash(unsigned char c) {
             break;
 
         case 0x17: // ctrl+w
-            newlineHandler(); // TODO: this has to clear lineBuffer
+            newlineHandler(); // TODO: this has to clear lineBuffer only
             break;
 
         case 0x7f: // backspace
@@ -163,8 +174,9 @@ ssize_t read(int fd, void *buf, size_t count) {
     ssize_t returnValue;
     static thread_local ReadSignature realRead = nullptr;
 
-    if (fd == 0) {
+    if (fd == 0) { // TODO: make it look good
         if (printBuffer.length()) {
+            // Return printBuffer to bash one char at time
             *reinterpret_cast<char *>(buf) = *printBufferPos;
             *lineBufferPos =  *printBufferPos++; // TODO: reapeted code
             lineBufferPos++;
