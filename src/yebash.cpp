@@ -18,6 +18,9 @@ typedef ssize_t (*ReadSignature)(int, void*, size_t);
 thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
+thread_local std::string printBuffer;
+thread_local std::string::iterator printBufferPos;
+
 thread_local std::vector<std::string> history;
 thread_local std::vector<std::string>::iterator historyPos;
 
@@ -93,6 +96,7 @@ void tabHandler() {
 
 static unsigned char yebash(unsigned char c) {
 
+    static char arrowIndicator = 0;
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
@@ -109,6 +113,24 @@ static unsigned char yebash(unsigned char c) {
 
         case 0x0d: // newline
             newlineHandler();
+            break;
+
+        case 0x1b: // first arrow char
+            arrowIndicator = 1;
+            break;
+
+        case 0x5b: // second ...
+            if (arrowIndicator == 1)
+                arrowIndicator = 2;
+            else regularCharHandler(c);
+            break;
+
+        case 0x43: // third ...
+            if (arrowIndicator == 2) {
+                arrowIndicator = 0;
+            } else regularCharHandler(c);
+            printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
+            printBufferPos = printBuffer.begin();
             break;
 
         case 0x17: // ctrl+w
@@ -136,6 +158,18 @@ ssize_t read(int fd, void *buf, size_t count) {
 
     ssize_t returnValue;
     static thread_local ReadSignature realRead = nullptr;
+
+    if (fd == 0) {
+        if (printBuffer.length()) {
+            *reinterpret_cast<char *>(buf) = *printBufferPos;
+            *lineBufferPos =  *printBufferPos++; // TODO: reapeted code
+            lineBufferPos++;
+            if (printBufferPos == printBuffer.end()) {
+                printBuffer.erase(printBuffer.begin(), printBuffer.end());
+            }
+            return 1;
+        }
+    }
 
     if (!realRead)
         realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
