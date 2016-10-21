@@ -34,7 +34,7 @@ static void readHistory() {
     std::string line;
 
     while (std::getline(historyFile, line))
-        history.push_back(line);
+        history.push_back(line); // TODO: maybe reverse order?
 
 }
 
@@ -47,9 +47,8 @@ static void newlineHandler() {
 
 static void backspaceHandler() {
 
-    if (lineBufferPos != lineBuffer.begin()) {
+    if (lineBufferPos != lineBuffer.begin())
         *(--lineBufferPos) = 0;
-    }
 
 }
 
@@ -113,9 +112,8 @@ void tabHandler() {
 static void yebash(unsigned char c) {
 
     // TODO: uncomment later
-    //if (!getenv("YEBASH")) {
+    //if (!getenv("YEBASH"))
     //    return;
-    //}
 
     readHistory();
 
@@ -137,14 +135,17 @@ static void yebash(unsigned char c) {
             backspaceHandler();
             break;
 
-        default: // regular char
-            regularCharHandler(c);
+        default: // regular char or other special chars
+            if (c < 0x20)
+                newlineHandler();
+            else
+                regularCharHandler(c);
             break;
 
     }
 }
 
-// TODO: make yebash able to modify read buffer
+// TODO: make yebash be able to modify read buffer
 
 ssize_t read(int fd, void *buf, size_t count) {
 
