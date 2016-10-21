@@ -39,6 +39,9 @@ static void readHistory() {
 
 static void newlineHandler() {
 
+    lineBuffer.fill(0);
+    lineBufferPos = lineBuffer.begin();
+
 }
 
 static void backspaceHandler() {
@@ -86,8 +89,16 @@ static void yebash(unsigned char c) {
 
     switch (c) {
 
+        case 0x09: // tab
+            // TODO: seeking through history
+            break;
+
         case 0x0d: // newline
             newlineHandler();
+            break;
+
+        case 0x17: // ctrl+w
+            newlineHandler(); // TODO: this has to clear lineBuffer
             break;
 
         case 0x7f: // backspace
