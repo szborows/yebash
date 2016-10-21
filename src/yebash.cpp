@@ -129,8 +129,12 @@ static unsigned char yebash(unsigned char c) {
             if (arrowIndicator == 2) {
                 arrowIndicator = 0;
             } else regularCharHandler(c);
-            printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
-            printBufferPos = printBuffer.begin();
+            try {
+                printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
+                printBufferPos = printBuffer.begin();
+            } catch (...) {
+                // FIXME:
+            }
             break;
 
         case 0x17: // ctrl+w
