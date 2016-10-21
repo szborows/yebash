@@ -1,3 +1,3 @@
 # yebash
 
-your enhances bash ;-)
+your enhanced bash ;-)
