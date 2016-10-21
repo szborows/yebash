@@ -21,7 +21,7 @@ thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
 thread_local std::vector<std::string> history;
-thread_local auto historyCurrentPos = history.end(); // FIXME: this is wrong, but I only need the iterator type
+thread_local std::vector<std::string>::iterator historyPos;
 
 static void readHistory() {
 
@@ -52,40 +52,24 @@ static void backspaceHandler() {
 
 }
 
-std::string findCompletion(const std::string &pattern) {
+std::string findCompletion(std::vector<std::string>::iterator start, const std::string &pattern) {
 
-    for (auto it = history.end() - 1; it > history.begin(); it--) {
+    for (auto it = start - 1; it > history.begin(); it--) {
         if (it->compare(0, pattern.length(), pattern) == 0) {
-            historyCurrentPos = it;
+            historyPos = it;
             return *it;
         }
     }
 
-    historyCurrentPos = history.end() - 1;
+    historyPos = history.end();
     return pattern;
 
 }
 
-
-// TODO: merge this with the above function
-std::string findNextCompletion(const std::string &pattern) {
-
-    for (auto it = historyCurrentPos; it >= history.begin(); it--) {
-        if (it->compare(0, pattern.length(), pattern) == 0) {
-            historyCurrentPos = it;
-            return *it;
-        }
-    }
-
-    historyCurrentPos = history.end() - 1;
-    return pattern;
-
-}
-
-void printCompletion() {
+void printCompletion(std::vector<std::string>::iterator startIterator) {
 
     std::string pattern(lineBuffer.data());
-    auto completion = findCompletion(pattern);
+    auto completion = findCompletion(startIterator, pattern);
 
     cursor_forward(1);
     printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
@@ -99,13 +83,13 @@ void regularCharHandler(char c) {
     *lineBufferPos = c;
     lineBufferPos++;
 
-    printCompletion();
+    printCompletion(history.end());
 
 }
 
 void tabHandler() {
 
-    printCompletion();
+    printCompletion(historyPos);
 
 }
 
@@ -119,7 +103,8 @@ static unsigned char yebash(unsigned char c) {
 
     switch (c) {
 
-        case 0x09: // tab
+        case 0x06: // ctrl+f
+            // FIXME: SEGFAULT
             tabHandler();
             break;
 
