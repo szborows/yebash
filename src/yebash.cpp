@@ -109,7 +109,7 @@ void tabHandler() {
 
 }
 
-static void yebash(unsigned char c) {
+static unsigned char yebash(unsigned char c) {
 
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
@@ -143,9 +143,10 @@ static void yebash(unsigned char c) {
             break;
 
     }
-}
 
-// TODO: make yebash be able to modify read buffer
+    return 0;
+
+}
 
 ssize_t read(int fd, void *buf, size_t count) {
 
@@ -156,8 +157,10 @@ ssize_t read(int fd, void *buf, size_t count) {
 
     returnValue = realRead(fd, buf, count);
 
-    if (fd == 0 && isatty(fileno(stdin)))
-        yebash(*reinterpret_cast<unsigned char *>(buf));
+    if (fd == 0 && isatty(fileno(stdin))) {
+        unsigned char c = yebash(*reinterpret_cast<unsigned char *>(buf));
+        if (c) *reinterpret_cast<unsigned char *>(buf) = c;
+    }
 
     return returnValue;
 
