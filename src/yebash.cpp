@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 typedef ssize_t (*ReadSignature)(int, void*, size_t);
-static ReadSignature real_read = nullptr;
 
+// TODO: per-process memory?
 static char __line[1024];
 static int __line_index = 0;
 
@@ -15,7 +15,6 @@ static int __line_index = 0;
 #define cursor_backward(x) printf("\033[%dD", (x))
 
 int open_history_file(FILE **f) {
-
     char history[512], *home_dir = getenv("HOME");
 
     strcpy(history, home_dir);
@@ -27,7 +26,6 @@ int open_history_file(FILE **f) {
     }
 
     return 0;
-
 }
 
 void complete_from_history(char *pattern, char *result) {
@@ -86,18 +84,13 @@ void interactive_completion(unsigned char c) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
+    static ReadSignature real_read = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+    ssize_t ret = real_read(fd, buf, count);
 
-    ssize_t ret;
-
-    if (!real_read)
-        real_read = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
-    ret = real_read(fd, buf, count);
-
-    if (fd == 0)
+    if (0 == fd) {
         interactive_completion(*(unsigned char *)buf);
+    }
 
     return ret;
-
 }
-
 
