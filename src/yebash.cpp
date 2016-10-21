@@ -21,6 +21,7 @@ thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
 thread_local std::vector<std::string> history;
+thread_local auto historyCurrentPos = history.end(); // FIXME: this is wrong, but I only need the iterator type
 
 static void readHistory() {
 
@@ -52,21 +53,37 @@ static void backspaceHandler() {
 
 }
 
- std::string findCompletion(const std::string &pattern) {
+std::string findCompletion(const std::string &pattern) {
 
     for (auto it = history.end() - 1; it > history.begin(); it--) {
-        if (it->compare(0, pattern.length(), pattern) == 0)
+        if (it->compare(0, pattern.length(), pattern) == 0) {
+            historyCurrentPos = it;
             return *it;
+        }
     }
 
+    historyCurrentPos = history.end() - 1;
     return pattern;
 
 }
 
-void regularCharHandler(char c) {
 
-    *lineBufferPos = c;
-    lineBufferPos++;
+// TODO: merge this with the above function
+std::string findNextCompletion(const std::string &pattern) {
+
+    for (auto it = historyCurrentPos; it >= history.begin(); it--) {
+        if (it->compare(0, pattern.length(), pattern) == 0) {
+            historyCurrentPos = it;
+            return *it;
+        }
+    }
+
+    historyCurrentPos = history.end() - 1;
+    return pattern;
+
+}
+
+void printCompletion() {
 
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(pattern);
@@ -75,6 +92,21 @@ void regularCharHandler(char c) {
     printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
     cursor_backward(completion.length() - pattern.length() + 1);
     fflush(stdout);
+
+}
+
+void regularCharHandler(char c) {
+
+    *lineBufferPos = c;
+    lineBufferPos++;
+
+    printCompletion();
+
+}
+
+void tabHandler() {
+
+    printCompletion();
 
 }
 
@@ -90,7 +122,7 @@ static void yebash(unsigned char c) {
     switch (c) {
 
         case 0x09: // tab
-            // TODO: seeking through history
+            tabHandler();
             break;
 
         case 0x0d: // newline
@@ -112,6 +144,7 @@ static void yebash(unsigned char c) {
     }
 }
 
+// TODO: make yebash able to modify read buffer
 
 ssize_t read(int fd, void *buf, size_t count) {
 
