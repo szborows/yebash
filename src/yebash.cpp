@@ -106,6 +106,7 @@ static unsigned char yebash(unsigned char c) {
         case 0x06: // ctrl+f
             // FIXME: SEGFAULT
             tabHandler();
+            c = 0;
             break;
 
         case 0x0d: // newline
@@ -129,7 +130,7 @@ static unsigned char yebash(unsigned char c) {
 
     }
 
-    return 0;
+    return c;
 
 }
 
@@ -142,10 +143,8 @@ ssize_t read(int fd, void *buf, size_t count) {
 
     returnValue = realRead(fd, buf, count);
 
-    if (fd == 0 && isatty(fileno(stdin))) {
-        unsigned char c = yebash(*reinterpret_cast<unsigned char *>(buf));
-        if (c) *reinterpret_cast<unsigned char *>(buf) = c;
-    }
+    if (fd == 0 && isatty(fileno(stdin)))
+        *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
 
     return returnValue;
 
