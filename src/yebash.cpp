@@ -10,8 +10,8 @@
 #include <array>
 #include <string>
 
-#define cursor_forward(x) printf("\033[%dC", (x))
-#define cursor_backward(x) printf("\033[%dD", (x))
+#define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
+#define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
 
 typedef ssize_t (*ReadSignature)(int, void*, size_t);
 
@@ -51,10 +51,9 @@ static void backspaceHandler() {
 
  std::string findCompletion(const std::string &pattern) {
 
-    for (size_t i = 0; i < history.size(); i++) {
-        if (history[i].compare(0, pattern.length(), pattern) == 0) {
-            return history[i];
-        }
+    for (auto it = history.end() - 1; it > history.begin(); it--) {
+        if (it->compare(0, pattern.length(), pattern) == 0)
+            return *it;
     }
 
     return pattern;
