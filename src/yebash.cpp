@@ -1,99 +1,121 @@
 #include <dlfcn.h>
-#include <string.h>
 #include <cstdio>
-#include <cstdlib>
-#include <sys/ioctl.h>
+#include <cstring>
 #include <unistd.h>
+#include <cstdlib>
+
+#include <iostream>
+#include <fstream>
+#include <vector>
 #include <array>
-
-typedef ssize_t (*ReadSignature)(int, void*, size_t);
-
-// TODO: per-process memory?
-using LineBuffer = std::array<char, 1024>;
-static LineBuffer line_buffer;
-static auto line_buffer_pos = line_buffer.begin();
+#include <string>
 
 #define cursor_forward(x) printf("\033[%dC", (x))
 #define cursor_backward(x) printf("\033[%dD", (x))
 
-int open_history_file(FILE **f) {
-    char history[512], *home_dir = getenv("HOME");
+typedef ssize_t (*ReadSignature)(int, void*, size_t);
 
-    strcpy(history, home_dir);
-    strcat(history, "/.bash_history");
+thread_local ReadSignature realRead = NULL;
 
-    if ((*f = fopen(history, "r")) == NULL) {
-        printf("No such file %s\n", history);
-        return -1;
-    }
+thread_local std::array<char, 1024> lineBuffer;
+thread_local auto lineBufferPos = lineBuffer.begin();
 
-    return 0;
+thread_local std::vector<std::string> history;
+
+static void readHistory() {
+
+    if (history.size()) return;
+
+    std::string historyFileName(getenv("HOME"));
+    historyFileName += "/.bash_history";
+
+    std::ifstream historyFile(historyFileName);
+    std::string line;
+
+    while (std::getline(historyFile, line))
+        history.push_back(line);
+
 }
 
-void complete_from_history(char *pattern, char *result) {
+static void newlineHandler() {
 
-    char *buffer = 0;
-    size_t len = 0;
+}
 
-    FILE *f = 0;
+static void backspaceHandler() {
 
-    open_history_file(&f);
+    if (lineBufferPos != lineBuffer.begin()) {
+        *(--lineBufferPos) = 0;
+    }
 
-    while (getline(&buffer, &len, f) != -1) {
-        *strchr(buffer, '\n') = 0;
-        if (!strncmp(buffer, pattern, strlen(pattern))) {
-            strcpy(result, buffer + strlen(pattern));
-            break;
+}
+
+ std::string findCompletion(const std::string &pattern) {
+
+    for (size_t i = 0; i < history.size(); i++) {
+        if (history[i].compare(0, pattern.length(), pattern) == 0) {
+            return history[i];
         }
     }
 
-    fclose(f);
+    return pattern;
 
 }
 
-void interactive_completion(unsigned char c) {
+void regularCharHandler(char c) {
 
-    char buffer[2048];
-    struct winsize w;
+    *lineBufferPos = c;
+    lineBufferPos++;
 
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); // TODO:
+    std::string pattern(lineBuffer.data());
+    auto completion = findCompletion(pattern);
+
+    cursor_forward(1);
+    printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
+    cursor_backward(completion.length() - pattern.length() + 1);
+    fflush(stdout);
+
+}
+
+static void yebash(unsigned char c) {
+
+    // TODO: uncomment later
+    //if (!getenv("YEBASH")) {
+    //    return;
+    //}
+
+    readHistory();
 
     switch (c) {
-        case 0xd: // newline
-            line_buffer_pos = line_buffer.begin();
-            std::fill(std::begin(line_buffer), std::end(line_buffer), 0);
-            memset(buffer, 0, 2048);
+
+        case 0x0d: // newline
+            newlineHandler();
             break;
 
         case 0x7f: // backspace
-            if (line_buffer_pos != line_buffer.begin()) {
-                *(--line_buffer_pos) = 0;
-            }
+            backspaceHandler();
             break;
 
-        default:
-            *(++line_buffer_pos) = c;
-            *(line_buffer_pos) = 0;
-            complete_from_history(line_buffer.data(), buffer);
-            if (strlen(buffer) > strlen(line_buffer.data())) {
-                cursor_forward(1);
-                printf("\e[1;30m%s\e[0m", buffer);
-                cursor_backward((int)strlen(buffer) + 1);
-                fflush(stdout);
-            }
+        default: // regular char
+            regularCharHandler(c);
             break;
-   }
 
+    }
 }
 
+
 ssize_t read(int fd, void *buf, size_t count) {
-    static ReadSignature real_read = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
-    ssize_t ret = real_read(fd, buf, count);
 
-    if (0 == fd) {
-        interactive_completion(*(unsigned char *)buf);
-    }
+    ssize_t returnValue;
 
-    return ret;
+    if (!realRead)
+        realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+
+    returnValue = realRead(fd, buf, count);
+
+    if (fd == 0)
+        yebash(*reinterpret_cast<unsigned char *>(buf));
+
+    return returnValue;
+
 }
 
