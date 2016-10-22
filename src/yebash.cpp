@@ -54,6 +54,8 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x7f, backspaceHandler}
 };
 
+// TODO(szborows): following one seems to be a little bit better.
+// http://stackoverflow.com/questions/16026858/reading-the-device-status-report-ansi-escape-sequence-reply
 void getCursorPosition(int &row, int &col) {
     char buffer[16], consoleCode[] = "\033[6n";
     termios old, raw;
