@@ -3,6 +3,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <cstdlib>
+#include <termios.h>
 
 #include <iostream>
 #include <fstream>
@@ -67,13 +68,33 @@ std::string findCompletion(std::vector<std::string>::iterator start, const std::
 
 }
 
+void getCursorPosition(int &row, int &col) {
+
+    char buffer[16], consoleCode[] = "\033[6n";
+    termios old, raw;
+
+    tcgetattr(0, &old);
+    cfmakeraw(&raw);
+    tcsetattr(0,TCSANOW,&raw);
+    write(1, consoleCode, sizeof(consoleCode));
+    read (0, buffer, sizeof(buffer));
+    tcsetattr(0, TCSANOW, &old);
+
+    row = buffer[2];
+    col = 0; // TODO
+
+}
+
 void clearTerminalLine() {
     // TODO: get info about terminal width and current cursor position
     // and fix below loops
+    int col, row;
+    getCursorPosition(row, col);
     for (int i = 0; i < 30; i++)
         printf(" ");
     for (int i = 0; i < 30; i++)
         cursor_backward(1);
+
 }
 
 void printCompletion(std::vector<std::string>::iterator startIterator, int offset) {
@@ -83,7 +104,8 @@ void printCompletion(std::vector<std::string>::iterator startIterator, int offse
 
     clearTerminalLine();
 
-    cursor_forward(offset);
+    if (offset)
+        cursor_forward(offset);
     printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
 
     cursor_backward(completion.length() - pattern.length() + offset);
