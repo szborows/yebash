@@ -76,16 +76,17 @@ void clearTerminalLine() {
         cursor_backward(1);
 }
 
-void printCompletion(std::vector<std::string>::iterator startIterator) {
+void printCompletion(std::vector<std::string>::iterator startIterator, int offset) {
 
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
 
     clearTerminalLine();
 
-    cursor_forward(1);
+    cursor_forward(offset);
     printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
-    cursor_backward(completion.length() - pattern.length() + 1);
+
+    cursor_backward(completion.length() - pattern.length() + offset);
     fflush(stdout);
 
 }
@@ -95,13 +96,13 @@ void regularCharHandler(char c) {
     *lineBufferPos = c;
     lineBufferPos++;
 
-    printCompletion(history.end());
+    printCompletion(history.end(), 1);
 
 }
 
 void tabHandler() {
 
-    printCompletion(historyPos);
+    printCompletion(historyPos, 0);
 
 }
 
@@ -178,8 +179,7 @@ ssize_t read(int fd, void *buf, size_t count) {
         if (printBuffer.length()) {
             // Return printBuffer to bash one char at time
             *reinterpret_cast<char *>(buf) = *printBufferPos;
-            *lineBufferPos =  *printBufferPos++; // TODO: reapeted code
-            lineBufferPos++;
+            *lineBufferPos++ =  *printBufferPos++;
             if (printBufferPos == printBuffer.end()) {
                 printBuffer.erase(printBuffer.begin(), printBuffer.end());
             }
