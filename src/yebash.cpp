@@ -130,7 +130,7 @@ void printCompletion(History::const_iterator startIterator, int offset) {
 CharOpt newlineHandler(Char) {
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
-    return std::experimental::nullopt;
+    return {};
 }
 
 CharOpt backspaceHandler(Char) {
@@ -138,7 +138,7 @@ CharOpt backspaceHandler(Char) {
         *(--lineBufferPos) = 0;
     }
 
-    return std::experimental::nullopt;
+    return {};
 }
 
 CharOpt regularCharHandler(Char c) {
@@ -147,7 +147,7 @@ CharOpt regularCharHandler(Char c) {
 
     printCompletion(history.end(), 1);
 
-    return std::experimental::nullopt;
+    return {};
 }
 
 CharOpt tabHandler(Char) {
@@ -157,13 +157,13 @@ CharOpt tabHandler(Char) {
 
 CharOpt arrowHandler1(Char) {
     arrowIndicator = 1;
-    return std::experimental::nullopt;
+    return {};
 }
 
 CharOpt arrowHandler2(Char c) {
     if (arrowIndicator == 1) {
         arrowIndicator = 2;
-        return std::experimental::nullopt;
+        return {};
     }
     else {
         return regularCharHandler(c);
@@ -171,7 +171,7 @@ CharOpt arrowHandler2(Char c) {
 }
 
 CharOpt arrowHandler3(Char c) {
-    CharOpt return_value = std::experimental::nullopt;
+    CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
     }
