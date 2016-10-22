@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <experimental/optional>
 
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
@@ -24,20 +25,24 @@ thread_local auto lineBufferPos = lineBuffer.begin();
 thread_local std::string printBuffer;
 thread_local std::string::iterator printBufferPos;
 
-thread_local std::vector<std::string> history;
-thread_local std::vector<std::string>::iterator historyPos;
+using History = std::vector<std::string>;
+thread_local History history;
+thread_local History::const_iterator historyPos;
 
 static char arrowIndicator = 0;
 
-void newlineHandler(unsigned char &);
-void tabHandler(unsigned char &);
-void backspaceHandler(unsigned char &);
-void regularCHarHandler(unsigned char &);
-void arrowHandler1(unsigned char &c);
-void arrowHandler2(unsigned char &c);
-void arrowHandler3(unsigned char &c);
+using Char = unsigned char;
+using CharOpt = std::experimental::optional<Char>;
 
-thread_local std::map<unsigned char, std::function<void(unsigned char &)>> handlers = {
+CharOpt newlineHandler(Char);
+CharOpt tabHandler(Char);
+CharOpt backspaceHandler(Char);
+CharOpt regularCHarHandler(Char);
+CharOpt arrowHandler1(Char);
+CharOpt arrowHandler2(Char);
+CharOpt arrowHandler3(Char);
+
+thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
@@ -48,8 +53,9 @@ thread_local std::map<unsigned char, std::function<void(unsigned char &)>> handl
 };
 
 static void readHistory() {
-
-    if (history.size()) return;
+    if (!history.empty()) {
+        return;
+    }
 
     std::string historyFileName(getenv("HOME"));
     historyFileName += "/.bash_history";
@@ -64,43 +70,9 @@ static void readHistory() {
 
     while (std::getline(historyFile, line))
         history.push_back(line); // TODO: maybe reverse order?
-
-}
-
-void newlineHandler(unsigned char &c) {
-
-    (void)c;
-
-    lineBuffer.fill(0);
-    lineBufferPos = lineBuffer.begin();
-
-}
-
-void backspaceHandler(unsigned char &c) {
-
-    (void)c;
-
-    if (lineBufferPos != lineBuffer.begin())
-        *(--lineBufferPos) = 0;
-
-}
-
-std::string findCompletion(std::vector<std::string>::iterator start, const std::string &pattern) {
-
-    for (auto it = start - 1; it > history.begin(); it--) {
-        if (it->compare(0, pattern.length(), pattern) == 0) {
-            historyPos = it;
-            return *it;
-        }
-    }
-
-    historyPos = history.end();
-    return pattern;
-
 }
 
 void getCursorPosition(int &row, int &col) {
-
     char buffer[16], consoleCode[] = "\033[6n";
     termios old, raw;
 
@@ -113,7 +85,6 @@ void getCursorPosition(int &row, int &col) {
 
     row = buffer[2];
     col = 0; // TODO
-
 }
 
 void clearTerminalLine() {
@@ -125,11 +96,23 @@ void clearTerminalLine() {
         printf(" ");
     for (int i = 0; i < 30; i++)
         cursor_backward(1);
-
 }
 
-void printCompletion(std::vector<std::string>::iterator startIterator, int offset) {
 
+std::string findCompletion(History::const_iterator start, const std::string &pattern) {
+    for (auto it = start - 1; it > history.begin(); it--) {
+        if (it->compare(0, pattern.length(), pattern) == 0) {
+            historyPos = it;
+            return *it;
+        }
+    }
+
+    historyPos = history.end();
+    return pattern;
+}
+
+
+void printCompletion(History::const_iterator startIterator, int offset) {
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
 
@@ -141,53 +124,72 @@ void printCompletion(std::vector<std::string>::iterator startIterator, int offse
 
     cursor_backward(completion.length() - pattern.length() + offset);
     fflush(stdout);
-
 }
 
-void regularCharHandler(unsigned char &c) {
 
+CharOpt newlineHandler(Char) {
+    lineBuffer.fill(0);
+    lineBufferPos = lineBuffer.begin();
+    return std::experimental::nullopt;
+}
+
+CharOpt backspaceHandler(Char) {
+    if (lineBufferPos != lineBuffer.begin()) {
+        *(--lineBufferPos) = 0;
+    }
+
+    return std::experimental::nullopt;
+}
+
+CharOpt regularCharHandler(Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
 
     printCompletion(history.end(), 1);
 
+    return std::experimental::nullopt;
 }
 
-void tabHandler(unsigned char &c) {
-
+CharOpt tabHandler(Char) {
     printCompletion(historyPos, 0);
-    c = 0; // TODO: this does not seem to work
-
+    return Char{0}; // TODO: this does not seem to work.
 }
 
-void arrowHandler1(unsigned char &c) {
-    (void)c;
+CharOpt arrowHandler1(Char) {
     arrowIndicator = 1;
+    return std::experimental::nullopt;
 }
 
-void arrowHandler2(unsigned char &c) {
-    (void)c;
-    if (arrowIndicator == 1)
+CharOpt arrowHandler2(Char c) {
+    if (arrowIndicator == 1) {
         arrowIndicator = 2;
-    else regularCharHandler(c);
+        return std::experimental::nullopt;
+    }
+    else {
+        return regularCharHandler(c);
+    }
 }
 
-void arrowHandler3(unsigned char &c) {
-    (void)c;
+CharOpt arrowHandler3(Char c) {
+    CharOpt return_value = std::experimental::nullopt;
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
-    } else regularCharHandler(c);
+    }
+    else {
+        return_value = regularCharHandler(c);
+    }
     try {
         printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
         printBufferPos = printBuffer.begin();
     } catch (...) {
         // FIXME:
     }
+
+    return return_value;
 }
 
 static unsigned char yebash(unsigned char c) {
 
-    unsigned char cReturned = c;
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
@@ -196,17 +198,24 @@ static unsigned char yebash(unsigned char c) {
 
     auto handler = handlers[c];
 
-    if (handler)
-        handler(cReturned);
+    CharOpt cReturned = c;
+    if (handler) {
+        handler(c);
+    }
     else {
-        if (c < 0x20)
-            newlineHandler(cReturned);
-        else
-            regularCharHandler(cReturned);
+        if (c < 0x20) {
+            newlineHandler(c);
+        }
+        else {
+            regularCharHandler(c);
+        }
     }
 
-    return cReturned;
+    if (static_cast<bool>(cReturned)) {
+        return cReturned.value();
+    }
 
+    return c;
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
