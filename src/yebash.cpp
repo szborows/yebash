@@ -10,6 +10,8 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <map>
+#include <functional>
 
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
@@ -25,6 +27,26 @@ thread_local std::string::iterator printBufferPos;
 thread_local std::vector<std::string> history;
 thread_local std::vector<std::string>::iterator historyPos;
 
+static char arrowIndicator = 0;
+
+void newlineHandler(unsigned char &);
+void tabHandler(unsigned char &);
+void backspaceHandler(unsigned char &);
+void regularCHarHandler(unsigned char &);
+void arrowHandler1(unsigned char &c);
+void arrowHandler2(unsigned char &c);
+void arrowHandler3(unsigned char &c);
+
+thread_local std::map<unsigned char, std::function<void(unsigned char &)>> handlers = {
+    {0x06, tabHandler},
+    {0x0d, newlineHandler},
+    {0x17, newlineHandler}, // TODO: this should delete one word
+    {0x1b, arrowHandler1},
+    {0x5b, arrowHandler2},
+    {0x43, arrowHandler3},
+    {0x7f, backspaceHandler}
+};
+
 static void readHistory() {
 
     if (history.size()) return;
@@ -35,19 +57,28 @@ static void readHistory() {
     std::ifstream historyFile(historyFileName);
     std::string line;
 
+    if (!historyFile.is_open()) {
+        fprintf(stderr, "Could not open history file!");
+        exit(1);
+    }
+
     while (std::getline(historyFile, line))
         history.push_back(line); // TODO: maybe reverse order?
 
 }
 
-static void newlineHandler() {
+void newlineHandler(unsigned char &c) {
+
+    (void)c;
 
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
 
 }
 
-static void backspaceHandler() {
+void backspaceHandler(unsigned char &c) {
+
+    (void)c;
 
     if (lineBufferPos != lineBuffer.begin())
         *(--lineBufferPos) = 0;
@@ -113,7 +144,7 @@ void printCompletion(std::vector<std::string>::iterator startIterator, int offse
 
 }
 
-void regularCharHandler(char c) {
+void regularCharHandler(unsigned char &c) {
 
     *lineBufferPos = c;
     lineBufferPos++;
@@ -122,73 +153,59 @@ void regularCharHandler(char c) {
 
 }
 
-void tabHandler() {
+void tabHandler(unsigned char &c) {
 
     printCompletion(historyPos, 0);
+    c = 0; // TODO: this does not seem to work
 
+}
+
+void arrowHandler1(unsigned char &c) {
+    (void)c;
+    arrowIndicator = 1;
+}
+
+void arrowHandler2(unsigned char &c) {
+    (void)c;
+    if (arrowIndicator == 1)
+        arrowIndicator = 2;
+    else regularCharHandler(c);
+}
+
+void arrowHandler3(unsigned char &c) {
+    (void)c;
+    if (arrowIndicator == 2) {
+        arrowIndicator = 0;
+    } else regularCharHandler(c);
+    try {
+        printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
+        printBufferPos = printBuffer.begin();
+    } catch (...) {
+        // FIXME:
+    }
 }
 
 static unsigned char yebash(unsigned char c) {
 
-    static char arrowIndicator = 0;
+    unsigned char cReturned = c;
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
 
     readHistory();
 
-    switch (c) {
+    auto handler = handlers[c];
 
-        case 0x06: // ctrl+f
-            // FIXME: SEGFAULT
-            tabHandler();
-            c = 0;
-            break;
-
-        case 0x0d: // newline
-            newlineHandler();
-            break;
-
-        case 0x1b: // first arrow char
-            arrowIndicator = 1;
-            break;
-
-        case 0x5b: // second ...
-            if (arrowIndicator == 1)
-                arrowIndicator = 2;
-            else regularCharHandler(c);
-            break;
-
-        case 0x43: // third ...
-            if (arrowIndicator == 2) {
-                arrowIndicator = 0;
-            } else regularCharHandler(c);
-            try {
-                printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
-                printBufferPos = printBuffer.begin();
-            } catch (...) {
-                // FIXME:
-            }
-            break;
-
-        case 0x17: // ctrl+w
-            newlineHandler(); // TODO: this has to clear lineBuffer only
-            break;
-
-        case 0x7f: // backspace
-            backspaceHandler();
-            break;
-
-        default: // regular char or other special chars
-            if (c < 0x20)
-                newlineHandler();
-            else
-                regularCharHandler(c);
-            break;
-
+    if (handler)
+        handler(cReturned);
+    else {
+        if (c < 0x20)
+            newlineHandler(cReturned);
+        else
+            regularCharHandler(cReturned);
     }
 
-    return c;
+    return cReturned;
 
 }
 
