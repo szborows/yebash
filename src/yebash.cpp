@@ -14,6 +14,8 @@
 #include <functional>
 #include <experimental/optional>
 
+#include "History.hpp"
+
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
 
@@ -25,7 +27,7 @@ thread_local auto lineBufferPos = lineBuffer.begin();
 thread_local std::string printBuffer;
 thread_local std::string::iterator printBufferPos;
 
-using History = std::vector<std::string>;
+using namespace yb;
 thread_local History history;
 thread_local History::const_iterator historyPos;
 
@@ -51,26 +53,6 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
 };
-
-static void readHistory() {
-    if (!history.empty()) {
-        return;
-    }
-
-    std::string historyFileName(getenv("HOME"));
-    historyFileName += "/.bash_history";
-
-    std::ifstream historyFile(historyFileName);
-    std::string line;
-
-    if (!historyFile.is_open()) {
-        fprintf(stderr, "Could not open history file!");
-        exit(1);
-    }
-
-    while (std::getline(historyFile, line))
-        history.push_back(line); // TODO: maybe reverse order?
-}
 
 void getCursorPosition(int &row, int &col) {
     char buffer[16], consoleCode[] = "\033[6n";
@@ -193,8 +175,7 @@ static unsigned char yebash(unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
-
-    readHistory();
+    history.read(std::string{getenv("HOME")} + "/.bash_history");
 
     auto handler = handlers[c];
 
@@ -244,6 +225,6 @@ ssize_t read(int fd, void *buf, size_t count) {
         *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
 
     return returnValue;
-
 }
+
 
