@@ -37,6 +37,7 @@ thread_local static char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 using Char = unsigned char;
 using CharOpt = std::experimental::optional<Char>;
+using StringOpt = std::experimental::optional<std::string>;
 
 CharOpt newlineHandler(Char);
 CharOpt tabHandler(Char);
@@ -67,30 +68,29 @@ void clearTerminalLine() {
     fflush(stdout);
 }
 
-std::string findCompletion(History::const_iterator start, const std::string &pattern) {
+StringOpt findCompletion(History::const_iterator start, const std::string &pattern) {
     for (auto it = start; it != history.end(); it++) {
         if (it->compare(0, pattern.length(), pattern) == 0) {
             historyPos = it;
             return *it;
         }
     }
-
     historyPos = history.begin();
-    return pattern;
+    return {};
 }
 
 void printCompletion(History::const_iterator startIterator, int offset) {
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
-    if (completion == pattern) return;
+    if (!completion) return;
 
     clearTerminalLine();
 
     if (offset)
         cursor_forward(offset);
-    printf("\e[1;30m%s\e[0m", completion.c_str() + pattern.length());
+    printf("\e[1;30m%s\e[0m", completion.value().c_str() + pattern.length());
 
-    cursor_backward(completion.length() - pattern.length() + offset);
+    cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
 
