@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <termios.h>
+#include <sys/ioctl.h>
 
 #include <iostream>
 #include <fstream>
@@ -82,14 +83,22 @@ int getCursorPosition(int &x, int &y) {
     return retVal;
 }
 
+int getTerminalWidth() {
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
+
 void clearTerminalLine() {
     // TODO: get info about terminal width and current cursor position
     // and fix below loops
-    int col, row;
+    int col, row, width;
     if (getCursorPosition(row, col)) return;
-    for (int i = 0; i < 30; i++)
+    width = getTerminalWidth();
+    for (int i = 0; i < width - col; i++)
         printf(" ");
-    for (int i = 0; i < 30; i++)
+    fflush(stdout);
+    for (int i = 0; i < width - col; i++)
         cursor_backward(1);
 }
 
