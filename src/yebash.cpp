@@ -185,12 +185,16 @@ static unsigned char yebash(unsigned char c) {
 
 }
 
+static inline bool is_terminal_input(int fd) {
+    return isatty(fd);
+}
+
 ssize_t read(int fd, void *buf, size_t count) {
 
     ssize_t returnValue;
     static thread_local ReadSignature realRead = nullptr;
 
-    if (fd == 0) { // TODO: make it look good
+    if (is_terminal_input(fd)) { // TODO: make it look good
         if (printBuffer.length()) {
             // Return printBuffer to bash one char at time
             *reinterpret_cast<char *>(buf) = *printBufferPos;
@@ -207,7 +211,7 @@ ssize_t read(int fd, void *buf, size_t count) {
 
     returnValue = realRead(fd, buf, count);
 
-    if (fd == 0 && isatty(fileno(stdin)))
+    if (is_terminal_input(fd))
         *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
 
     return returnValue;
