@@ -3,8 +3,6 @@
 #include <cstring>
 #include <unistd.h>
 #include <cstdlib>
-#include <termios.h>
-#include <sys/ioctl.h>
 
 #include <iostream>
 #include <fstream>
@@ -23,13 +21,14 @@
 
 // https://www.akkadia.org/drepper/tls.pdf
 
+using namespace yb;
+
 thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
 thread_local std::string printBuffer;
 thread_local std::string::iterator printBufferPos;
 
-using namespace yb;
 thread_local History history;
 thread_local History::const_iterator historyPos;
 
@@ -80,7 +79,6 @@ std::string findCompletion(History::const_iterator start, const std::string &pat
     return pattern;
 }
 
-
 void printCompletion(History::const_iterator startIterator, int offset) {
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
@@ -94,7 +92,6 @@ void printCompletion(History::const_iterator startIterator, int offset) {
     cursor_backward(completion.length() - pattern.length() + offset);
     fflush(stdout);
 }
-
 
 CharOpt newlineHandler(Char) {
     lineBuffer.fill(0);
