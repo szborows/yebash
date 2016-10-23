@@ -203,9 +203,10 @@ static unsigned char yebash(unsigned char c) {
     // that bash is using (e.g. ctrl+r for history searching, arrows for moving, etc.).
     // It would be thoughtful if we just disable our yebash if any of these codes would
     // occur and reenable it after a newline
-    CharOpt cReturned = c;
+    CharOpt cReturned;
+
     if (handler) {
-        handler(c);
+        cReturned = handler(c);
     }
     else {
         if (c < 0x20) {
@@ -216,11 +217,8 @@ static unsigned char yebash(unsigned char c) {
         }
     }
 
-    if (static_cast<bool>(cReturned)) {
-        return cReturned.value();
-    }
+    return cReturned.value_or(c);
 
-    return c;
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
