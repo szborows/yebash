@@ -20,6 +20,8 @@
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
 
+// https://www.akkadia.org/drepper/tls.pdf
+
 thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
