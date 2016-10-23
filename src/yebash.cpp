@@ -32,7 +32,7 @@ thread_local std::string::iterator printBufferPos;
 thread_local History history;
 thread_local History::const_iterator historyPos;
 
-static char arrowIndicator = 0;
+thread_local static char arrowIndicator = 0;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 using Char = unsigned char;
@@ -68,14 +68,14 @@ void clearTerminalLine() {
 }
 
 std::string findCompletion(History::const_iterator start, const std::string &pattern) {
-    for (auto it = start - 1; it > history.begin(); it--) {
+    for (auto it = start; it != history.end(); it++) {
         if (it->compare(0, pattern.length(), pattern) == 0) {
             historyPos = it;
             return *it;
         }
     }
 
-    historyPos = history.end();
+    historyPos = history.begin();
     return pattern;
 }
 
@@ -111,13 +111,13 @@ CharOpt regularCharHandler(Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
 
-    printCompletion(history.end(), 1);
+    printCompletion(history.begin(), 1);
 
     return {};
 }
 
 CharOpt tabHandler(Char) {
-    printCompletion(historyPos, 0);
+    printCompletion(std::next(historyPos, 1), 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 

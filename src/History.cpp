@@ -19,7 +19,7 @@ void History::read(std::string const& path) {
 
     string line;
     while (getline(historyFile, line)) {
-        entries_.push_back(line); // TODO: maybe reverse order?
+        entries_.push_front(line);
     }
 }
 

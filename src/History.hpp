@@ -1,18 +1,18 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <forward_list>
 
 namespace yb {
 
-using HistoryEntries = std::vector<std::string>;
+using HistoryEntries = std::forward_list<std::string>;
 
 struct History final {
     void read(std::string const& path);
 
     using const_iterator = HistoryEntries::const_iterator;
-    const_iterator begin() const { return entries_.cbegin(); };
-    const_iterator end() const { return entries_.cend(); };
+    auto begin() const { return entries_.cbegin(); };
+    auto end() const { return entries_.cend(); };
 
 private:
     HistoryEntries entries_;
