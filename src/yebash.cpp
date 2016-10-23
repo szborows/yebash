@@ -54,8 +54,8 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x7f, backspaceHandler}
 };
 
-int getCursorPosition(int &x, int &y) {
-    int retVal = -1;
+int getCursorPosition() {
+    int retVal = 0, x, y;
     fd_set stdInSet;
     struct timeval time;
     struct termios rawTermios, oldTermios;
@@ -76,7 +76,7 @@ int getCursorPosition(int &x, int &y) {
 
     if (select(STDIN_FILENO + 1, &stdInSet, NULL, NULL, &time) == 1)
         if (scanf("\033[%d;%dR", &x, &y) == 2)
-            retVal = 0;
+            retVal = y;
 
     tcsetattr(STDIN_FILENO, TCSADRAIN, &oldTermios);
 
@@ -90,15 +90,13 @@ int getTerminalWidth() {
 }
 
 void clearTerminalLine() {
-    // TODO: get info about terminal width and current cursor position
-    // and fix below loops
-    int col, row, width;
-    if (getCursorPosition(row, col)) return;
+    int pos, width;
+    if (!(pos = getCursorPosition())) return;
     width = getTerminalWidth();
-    for (int i = 0; i < width - col; i++)
+    for (int i = 0; i < width - pos; i++)
         printf(" ");
     fflush(stdout);
-    for (int i = 0; i < width - col; i++)
+    for (int i = 0; i < width - pos; i++)
         cursor_backward(1);
 }
 
