@@ -53,28 +53,40 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x7f, backspaceHandler}
 };
 
-// TODO(szborows): following one seems to be a little bit better.
-// http://stackoverflow.com/questions/16026858/reading-the-device-status-report-ansi-escape-sequence-reply
-void getCursorPosition(int &row, int &col) {
-    char buffer[16], consoleCode[] = "\033[6n";
-    termios old, raw;
+int getCursorPosition(int &x, int &y) {
+    int retVal = -1;
+    fd_set stdInSet;
+    struct timeval time;
+    struct termios rawTermios, oldTermios;
 
-    tcgetattr(0, &old);
-    cfmakeraw(&raw);
-    tcsetattr(0,TCSANOW,&raw);
-    write(1, consoleCode, sizeof(consoleCode));
-    read (0, buffer, sizeof(buffer));
-    tcsetattr(0, TCSANOW, &old);
+    tcgetattr(STDIN_FILENO, &oldTermios);
+    rawTermios = oldTermios;
+    rawTermios.c_lflag &= ~ICANON;
+    rawTermios.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &rawTermios);
 
-    row = buffer[2];
-    col = 0; // TODO
+    printf("\033[6n");
+    fflush(stdout);
+
+    FD_ZERO(&stdInSet);
+    FD_SET(STDIN_FILENO, &stdInSet);
+    time.tv_sec = 0;
+    time.tv_usec = 100000;
+
+    if (select(STDIN_FILENO + 1, &stdInSet, NULL, NULL, &time) == 1)
+        if (scanf("\033[%d;%dR", &x, &y) == 2)
+            retVal = 0;
+
+    tcsetattr(STDIN_FILENO, TCSADRAIN, &oldTermios);
+
+    return retVal;
 }
 
 void clearTerminalLine() {
     // TODO: get info about terminal width and current cursor position
     // and fix below loops
     int col, row;
-    getCursorPosition(row, col);
+    if (getCursorPosition(row, col)) return;
     for (int i = 0; i < 30; i++)
         printf(" ");
     for (int i = 0; i < 30; i++)
