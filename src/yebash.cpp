@@ -157,10 +157,6 @@ static unsigned char yebash(unsigned char c) {
 
     auto handler = handlers[c];
 
-    // TODO(Mrokkk): There would be a problem with processing all escape codes
-    // that bash is using (e.g. ctrl+r for history searching, arrows for moving, etc.).
-    // It would be thoughtful if we just disable our yebash if any of these codes would
-    // occur and reenable it after a newline
     CharOpt cReturned;
 
     if (handler) {
