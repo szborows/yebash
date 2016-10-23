@@ -19,8 +19,6 @@
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
 
-typedef ssize_t (*ReadSignature)(int, void*, size_t);
-
 thread_local std::array<char, 1024> lineBuffer;
 thread_local auto lineBufferPos = lineBuffer.begin();
 
@@ -33,6 +31,7 @@ thread_local History::const_iterator historyPos;
 
 static char arrowIndicator = 0;
 
+using ReadSignature = ssize_t (*)(int, void*, size_t);
 using Char = unsigned char;
 using CharOpt = std::experimental::optional<Char>;
 
