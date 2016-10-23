@@ -7,6 +7,8 @@
 
 #include "TerminalInfo.hpp"
 
+namespace yb {
+
 int TerminalInfo::getCursorPosition() {
     int retVal = 0, x, y;
     fd_set stdInSet;
@@ -42,4 +44,4 @@ int TerminalInfo::getWidth() {
     return w.ws_col;
 }
 
-
+} // namespace yb
