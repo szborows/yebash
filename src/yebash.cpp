@@ -11,10 +11,11 @@
 #include <string>
 #include <map>
 #include <functional>
-#include <experimental/optional>
 
+#include "Defs.hpp"
 #include "History.hpp"
 #include "TerminalInfo.hpp"
+#include "KeyHandlers.hpp"
 
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
@@ -32,12 +33,9 @@ thread_local std::string::iterator printBufferPos;
 thread_local History history;
 thread_local History::const_iterator historyPos;
 
-thread_local static char arrowIndicator = 0;
+thread_local char arrowIndicator = 0;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
-using Char = unsigned char;
-using CharOpt = std::experimental::optional<Char>;
-using StringOpt = std::experimental::optional<std::string>;
 
 CharOpt newlineHandler(Char);
 CharOpt tabHandler(Char);
@@ -51,7 +49,7 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
-    {0x1b, arrowHandler1},
+    {0x1b, yb::arrowHandler1},
     {0x5b, arrowHandler2},
     {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
@@ -120,11 +118,6 @@ CharOpt regularCharHandler(Char c) {
 CharOpt tabHandler(Char) {
     printCompletion(std::next(historyPos, 1), 0);
     return Char{0}; // TODO: this does not seem to work.
-}
-
-CharOpt arrowHandler1(Char) {
-    arrowIndicator = 1;
-    return {};
 }
 
 CharOpt arrowHandler2(Char c) {
