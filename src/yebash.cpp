@@ -16,6 +16,7 @@
 #include <experimental/optional>
 
 #include "History.hpp"
+#include "TerminalInfo.hpp"
 
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
@@ -56,52 +57,16 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x7f, backspaceHandler}
 };
 
-int getCursorPosition() {
-    int retVal = 0, x, y;
-    fd_set stdInSet;
-    struct timeval time;
-    struct termios rawTermios, oldTermios;
-
-    tcgetattr(STDIN_FILENO, &oldTermios);
-    rawTermios = oldTermios;
-    rawTermios.c_lflag &= ~ICANON;
-    rawTermios.c_lflag &= ~ECHO;
-    tcsetattr(STDIN_FILENO, TCSANOW, &rawTermios);
-
-    printf("\033[6n");
-    fflush(stdout);
-
-    FD_ZERO(&stdInSet);
-    FD_SET(STDIN_FILENO, &stdInSet);
-    time.tv_sec = 0;
-    time.tv_usec = 100000;
-
-    if (select(STDIN_FILENO + 1, &stdInSet, NULL, NULL, &time) == 1)
-        if (scanf("\033[%d;%dR", &x, &y) == 2)
-            retVal = y;
-
-    tcsetattr(STDIN_FILENO, TCSADRAIN, &oldTermios);
-
-    return retVal;
-}
-
-int getTerminalWidth() {
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    return w.ws_col;
-}
-
 void clearTerminalLine() {
     int pos, width;
-    if (!(pos = getCursorPosition())) return;
-    width = getTerminalWidth();
+    if (!(pos = TerminalInfo::getCursorPosition())) return;
+    width = TerminalInfo::getWidth();
     for (int i = 0; i < width - pos; i++)
         printf(" ");
     fflush(stdout);
     for (int i = 0; i < width - pos; i++)
         cursor_backward(1);
 }
-
 
 std::string findCompletion(History::const_iterator start, const std::string &pattern) {
     for (auto it = start - 1; it > history.begin(); it--) {
