@@ -140,15 +140,15 @@ CharOpt arrowHandler3(Char c) {
     CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
+        try {
+            printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
+            printBufferPos = printBuffer.begin();
+        } catch (...) {
+            // FIXME:
+        }
     }
     else {
         return_value = regularCharHandler(c);
-    }
-    try {
-        printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
-        printBufferPos = printBuffer.begin();
-    } catch (...) {
-        // FIXME:
     }
 
     return return_value;
