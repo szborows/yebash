@@ -62,9 +62,9 @@ void clearTerminalLine() {
     width = TerminalInfo::getWidth();
     for (int i = 0; i < width - pos; i++)
         printf(" ");
-    fflush(stdout);
     for (int i = 0; i < width - pos; i++)
         cursor_backward(1);
+    fflush(stdout);
 }
 
 std::string findCompletion(History::const_iterator start, const std::string &pattern) {
@@ -82,6 +82,7 @@ std::string findCompletion(History::const_iterator start, const std::string &pat
 void printCompletion(History::const_iterator startIterator, int offset) {
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
+    if (completion == pattern) return;
 
     clearTerminalLine();
 
