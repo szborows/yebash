@@ -1,6 +1,7 @@
 #include "yebash.hpp"
 #include "History.hpp"
 
+#include "catch.hpp"
 #include <iostream>
 #include <sstream>
 using namespace std;
