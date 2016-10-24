@@ -12,6 +12,7 @@
 #include <map>
 #include <functional>
 
+#include "yebash.hpp"
 #include "Defs.hpp"
 #include "History.hpp"
 #include "TerminalInfo.hpp"
@@ -155,7 +156,9 @@ CharOpt arrowHandler3(Char c) {
     return return_value;
 }
 
-static unsigned char yebash(unsigned char c) {
+namespace yb {
+
+unsigned char yebash(unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
@@ -176,6 +179,8 @@ static unsigned char yebash(unsigned char c) {
     return cReturned.value_or(c);
 }
 
+} // namespace yb
+
 static inline bool is_terminal_input(int fd) {
     return isatty(fd);
 }
@@ -194,7 +199,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
+        *reinterpret_cast<unsigned char *>(buf) = yb::yebash(*reinterpret_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
