@@ -7,7 +7,7 @@ if (ASAN)
 endif()
 
 set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -Werror -Wextra ${ADDITIONAL_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "-shared -fPIC ${ADDITIONAL_LD_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${ADDITIONAL_LD_FLAGS}")
 
 add_subdirectory(src)
 add_subdirectory(test)
