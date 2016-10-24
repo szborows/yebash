@@ -209,10 +209,10 @@ static void yebashInit()  {
     if (!realRead) {
         realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
     }
-
     std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
     if (!historyFile.is_open()) {
         throw std::runtime_error{"Could not open history file"};
     }
     gHistory.read(historyFile);
+    historyFile.close();
 }
