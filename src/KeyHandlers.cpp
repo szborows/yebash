@@ -4,7 +4,7 @@ extern thread_local char arrowIndicator;
 
 namespace yb {
 
-CharOpt arrowHandler1(Char) {
+CharOpt arrowHandler1(History const&, Char) {
     arrowIndicator = 1;
     return {};
 }

@@ -11,10 +11,10 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <stdexcept>
 
 #include "yebash.hpp"
 #include "Defs.hpp"
-#include "History.hpp"
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
 
@@ -39,15 +39,15 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-CharOpt newlineHandler(Char);
-CharOpt tabHandler(Char);
-CharOpt backspaceHandler(Char);
-CharOpt regularCHarHandler(Char);
-CharOpt arrowHandler1(Char);
-CharOpt arrowHandler2(Char);
-CharOpt arrowHandler3(Char);
+CharOpt newlineHandler(History const&, Char);
+CharOpt tabHandler(History const&, Char);
+CharOpt backspaceHandler(History const&, Char);
+CharOpt regularCHarHandler(History const&, Char);
+CharOpt arrowHandler1(History const&, Char);
+CharOpt arrowHandler2(History const&, Char);
+CharOpt arrowHandler3(History const&, Char);
 
-thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
+thread_local std::map<Char, std::function<CharOpt(History const&, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
@@ -104,42 +104,42 @@ void printCompletion(History::const_iterator startIterator, int offset) {
     fflush(stdout);
 }
 
-CharOpt newlineHandler(Char) {
+CharOpt newlineHandler(History const&, Char) {
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
     return {};
 }
 
-CharOpt backspaceHandler(Char) {
+CharOpt backspaceHandler(History const&, Char) {
     if (lineBufferPos != lineBuffer.begin()) {
         *(--lineBufferPos) = 0;
     }
     return {};
 }
 
-CharOpt regularCharHandler(Char c) {
+CharOpt regularCharHandler(History const& history, Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
     printCompletion(history.begin(), 1);
     return {};
 }
 
-CharOpt tabHandler(Char) {
+CharOpt tabHandler(History const&, Char) {
     printCompletion(std::next(historyPos, 1), 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(Char c) {
+CharOpt arrowHandler2(History const& history, Char c) {
     if (arrowIndicator == 1) {
         arrowIndicator = 2;
         return {};
     }
     else {
-        return regularCharHandler(c);
+        return regularCharHandler(history, c);
     }
 }
 
-CharOpt arrowHandler3(Char c) {
+CharOpt arrowHandler3(History const& history, Char c) {
     CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
@@ -151,29 +151,28 @@ CharOpt arrowHandler3(Char c) {
         }
     }
     else {
-        return_value = regularCharHandler(c);
+        return_value = regularCharHandler(history, c);
     }
     return return_value;
 }
 
 namespace yb {
 
-unsigned char yebash(unsigned char c) {
+unsigned char yebash(History const& history, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
-    history.read(std::string{getenv("HOME")} + "/.bash_history");
     auto handler = handlers[c];
     CharOpt cReturned;
     if (handler) {
-        cReturned = handler(c);
+        cReturned = handler(history, c);
     }
     else {
         if (c < 0x20) {
-            newlineHandler(c);
+            newlineHandler(history, c);
         }
         else {
-            regularCharHandler(c);
+            regularCharHandler(history, c);
         }
     }
     return cReturned.value_or(c);
@@ -200,7 +199,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(history, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
@@ -210,4 +209,10 @@ static void yebashInit()  {
     if (!realRead) {
         realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
     }
+
+    std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
+    if (!historyFile.is_open()) {
+        throw std::runtime_error{"Could not open history file"};
+    }
+    history.read(historyFile);
 }

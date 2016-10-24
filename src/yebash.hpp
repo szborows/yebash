@@ -1,8 +1,10 @@
 #pragma once
 
+#include "History.hpp"
+
 namespace yb {
 
-unsigned char yebash(unsigned char c);
+unsigned char yebash(History const& history, unsigned char c);
 
 } // namespace yb
 
