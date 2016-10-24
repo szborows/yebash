@@ -12,8 +12,8 @@ namespace yb {
 int TerminalInfo::getCursorPosition() {
     int retVal = 0, x, y;
     fd_set stdInSet;
-    struct timeval time;
-    struct termios rawTermios, oldTermios;
+    timeval time;
+    termios rawTermios, oldTermios;
 
     tcgetattr(STDIN_FILENO, &oldTermios);
     rawTermios = oldTermios;
@@ -39,7 +39,7 @@ int TerminalInfo::getCursorPosition() {
 }
 
 int TerminalInfo::getWidth() {
-    struct winsize w;
+    winsize w;
     ioctl(0, TIOCGWINSZ, &w);
     return w.ws_col;
 }

@@ -55,15 +55,19 @@ thread_local std::map<Char, std::function<CharOpt(Char)>> handlers = {
     {0x7f, backspaceHandler}
 };
 
+static inline void deleteRows(int rows) {
+    for (int i = 0; i < rows; i++)
+        std::putchar(' ');
+    for (int i = 0; i < rows; i++)
+        cursor_backward(1);
+    fflush(stdout);
+}
+
 void clearTerminalLine() {
     int pos, width;
     if (!(pos = TerminalInfo::getCursorPosition())) return;
     width = TerminalInfo::getWidth();
-    for (int i = 0; i < width - pos; i++)
-        printf(" ");
-    for (int i = 0; i < width - pos; i++)
-        cursor_backward(1);
-    fflush(stdout);
+    deleteRows(width - pos);
 }
 
 StringOpt findCompletion(History::const_iterator start, const std::string &pattern) {
@@ -75,6 +79,10 @@ StringOpt findCompletion(History::const_iterator start, const std::string &patte
     }
     historyPos = history.begin();
     return {};
+}
+
+static inline void printColor(const char *buffer) {
+    printf("\e[31m%s\e[0m", buffer);
 }
 
 void printCompletion(History::const_iterator startIterator, int offset) {
@@ -89,7 +97,7 @@ void printCompletion(History::const_iterator startIterator, int offset) {
     clearTerminalLine();
     if (offset)
         cursor_forward(offset);
-    printf("\e[1;30m%s\e[0m", completion.value().c_str() + pattern.length());
+    printColor(completion.value().c_str() + pattern.length());
     cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
