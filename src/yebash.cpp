@@ -104,16 +104,13 @@ CharOpt backspaceHandler(Char) {
     if (lineBufferPos != lineBuffer.begin()) {
         *(--lineBufferPos) = 0;
     }
-
     return {};
 }
 
 CharOpt regularCharHandler(Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
-
     printCompletion(history.begin(), 1);
-
     return {};
 }
 
@@ -146,21 +143,16 @@ CharOpt arrowHandler3(Char c) {
     else {
         return_value = regularCharHandler(c);
     }
-
     return return_value;
 }
 
 static unsigned char yebash(unsigned char c) {
-
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
     history.read(std::string{getenv("HOME")} + "/.bash_history");
-
     auto handler = handlers[c];
-
     CharOpt cReturned;
-
     if (handler) {
         cReturned = handler(c);
     }
@@ -172,9 +164,7 @@ static unsigned char yebash(unsigned char c) {
             regularCharHandler(c);
         }
     }
-
     return cReturned.value_or(c);
-
 }
 
 static inline bool is_terminal_input(int fd) {
@@ -182,10 +172,7 @@ static inline bool is_terminal_input(int fd) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-
-    ssize_t returnValue;
     static thread_local ReadSignature realRead = nullptr;
-
     if (is_terminal_input(fd)) { // TODO: make it look good
         if (printBuffer.length()) {
             // Return printBuffer to bash one char at time
@@ -197,15 +184,13 @@ ssize_t read(int fd, void *buf, size_t count) {
             return 1;
         }
     }
-
-    if (!realRead)
+    if (!realRead) {
         realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
-
-    returnValue = realRead(fd, buf, count);
-
-    if (is_terminal_input(fd))
+    }
+    auto returnValue = realRead(fd, buf, count);
+    if (is_terminal_input(fd)) {
         *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
-
+    }
     return returnValue;
 }
 
