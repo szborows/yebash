@@ -15,6 +15,9 @@ int main() {
 
     History history;
     history.read(ss);
-    auto c = yebash(history, 'd');
+
+    History::const_iterator historyPos = history.begin();
+
+    auto c = yebash(history, historyPos,  'd');
     cout << c << endl;
 }
