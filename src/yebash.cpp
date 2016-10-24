@@ -36,6 +36,7 @@ thread_local History::const_iterator historyPos;
 thread_local char arrowIndicator = 0;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
+static thread_local ReadSignature realRead = nullptr;
 
 CharOpt newlineHandler(Char);
 CharOpt tabHandler(Char);
@@ -180,7 +181,6 @@ static inline bool is_terminal_input(int fd) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-    static thread_local ReadSignature realRead = nullptr;
     if (is_terminal_input(fd)) { // TODO: make it look good
         if (printBuffer.length()) {
             // Return printBuffer to bash one char at time
@@ -192,9 +192,6 @@ ssize_t read(int fd, void *buf, size_t count) {
             return 1;
         }
     }
-    if (!realRead) {
-        realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
-    }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
         *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
@@ -202,4 +199,9 @@ ssize_t read(int fd, void *buf, size_t count) {
     return returnValue;
 }
 
-
+__attribute__((constructor))
+static void yebashInit()  {
+    if (!realRead) {
+        realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+    }
+}
