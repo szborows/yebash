@@ -80,14 +80,16 @@ StringOpt findCompletion(History::const_iterator start, const std::string &patte
 void printCompletion(History::const_iterator startIterator, int offset) {
     std::string pattern(lineBuffer.data());
     auto completion = findCompletion(startIterator, pattern);
-    if (!completion) return;
-
+    if (!completion) {
+        return;
+    }
+    if (pattern.length() == completion.value().length()) {
+        return;
+    }
     clearTerminalLine();
-
     if (offset)
         cursor_forward(offset);
     printf("\e[1;30m%s\e[0m", completion.value().c_str() + pattern.length());
-
     cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
