@@ -83,8 +83,8 @@ StringOpt findCompletion(History const& history, History::const_iterator & histo
     return {};
 }
 
-static inline void printColor(const char *buffer) {
-    printf("\e[31m%s\e[0m", buffer);
+static inline void printColor(const char *buffer, Color color) {
+    printf("\e[%dm%s\e[0m", static_cast<int>(color), buffer);
 }
 
 void printCompletion(History const& history, History::const_iterator & historyPos, History::const_iterator startIterator, int offset) {
@@ -99,7 +99,7 @@ void printCompletion(History const& history, History::const_iterator & historyPo
     clearTerminalLine();
     if (offset)
         cursor_forward(offset);
-    printColor(completion.value().c_str() + pattern.length());
+    printColor(completion.value().c_str() + pattern.length(), Color::red);
     cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
