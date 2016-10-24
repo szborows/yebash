@@ -180,21 +180,22 @@ static inline bool is_terminal_input(int fd) {
     return isatty(fd);
 }
 
+static inline void putCharToReadBuffer(char *buf) {
+    *buf = *printBufferPos;
+    *lineBufferPos++ =  *printBufferPos++;
+    if (printBufferPos == printBuffer.end()) {
+        printBuffer.erase(printBuffer.begin(), printBuffer.end());
+    }
+}
+
 ssize_t read(int fd, void *buf, size_t count) {
-    if (is_terminal_input(fd)) { // TODO: make it look good
-        if (printBuffer.length()) {
-            // Return printBuffer to bash one char at time
-            *reinterpret_cast<char *>(buf) = *printBufferPos;
-            *lineBufferPos++ =  *printBufferPos++;
-            if (printBufferPos == printBuffer.end()) {
-                printBuffer.erase(printBuffer.begin(), printBuffer.end());
-            }
-            return 1;
-        }
+    if (is_terminal_input(fd) && printBuffer.length()) {
+        putCharToReadBuffer(static_cast<char *>(buf));
+        return 1;
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *reinterpret_cast<unsigned char *>(buf) = yebash(*reinterpret_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yebash(*static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
