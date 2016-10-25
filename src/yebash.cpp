@@ -41,7 +41,7 @@ static thread_local ReadSignature realRead = nullptr;
 
 using ColorOpt = std::experimental::optional<Color>;
 constexpr const Color defaultCompletionColor = Color::grey;
-ColorOpt completionColor = {};
+thread_local ColorOpt completionColor = {};
 
 CharOpt newlineHandler(History const&, History::const_iterator &, Char);
 CharOpt tabHandler(History const&, History::const_iterator &, Char);
