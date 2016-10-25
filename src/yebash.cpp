@@ -1,8 +1,5 @@
 #include <dlfcn.h>
-#include <cstdio>
-#include <cstring>
 #include <unistd.h>
-#include <cstdlib>
 
 #include <iostream>
 #include <fstream>
@@ -62,11 +59,9 @@ thread_local std::map<Char, std::function<CharOpt(History const&, History::const
 };
 
 static inline void deleteRows(int rows) {
-    for (int i = 0; i < rows; i++)
-        std::putchar(' ');
-    for (int i = 0; i < rows; i++)
-        cursor_backward(1);
-    fflush(stdout);
+    std::cout << std::string(rows, ' ');
+    cursor_backward(rows);
+    std::cout << std::flush;
 }
 
 void clearTerminalLine() {
@@ -88,7 +83,7 @@ StringOpt findCompletion(History const& history, History::const_iterator & histo
 }
 
 static inline void printColor(const char *buffer, ColorOpt color) {
-    printf("\e[%dm%s\e[0m", static_cast<int>(color.value_or(defaultCompletionColor)), buffer);
+    std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
 }
 
 void printCompletion(History const& history, History::const_iterator & historyPos, History::const_iterator startIterator, int offset) {
@@ -105,7 +100,7 @@ void printCompletion(History const& history, History::const_iterator & historyPo
         cursor_forward(offset);
     printColor(completion.value().c_str() + pattern.length(), completionColor);
     cursor_backward(completion.value().length() - pattern.length() + offset);
-    fflush(stdout);
+    std::cout << std::flush;
 }
 
 CharOpt newlineHandler(History const&, History::const_iterator &, Char) {
