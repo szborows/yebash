@@ -39,6 +39,10 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
+using ColorOpt = std::experimental::optional<Color>;
+constexpr const Color defaultCompletionColor = Color::grey;
+ColorOpt completionColor = {};
+
 CharOpt newlineHandler(History const&, History::const_iterator &, Char);
 CharOpt tabHandler(History const&, History::const_iterator &, Char);
 CharOpt backspaceHandler(History const&, History::const_iterator &, Char);
@@ -83,8 +87,8 @@ StringOpt findCompletion(History const& history, History::const_iterator & histo
     return {};
 }
 
-static inline void printColor(const char *buffer, Color color) {
-    printf("\e[%dm%s\e[0m", static_cast<int>(color), buffer);
+static inline void printColor(const char *buffer, ColorOpt color) {
+    printf("\e[%dm%s\e[0m", static_cast<int>(color.value_or(defaultCompletionColor)), buffer);
 }
 
 void printCompletion(History const& history, History::const_iterator & historyPos, History::const_iterator startIterator, int offset) {
@@ -99,7 +103,7 @@ void printCompletion(History const& history, History::const_iterator & historyPo
     clearTerminalLine();
     if (offset)
         cursor_forward(offset);
-    printColor(completion.value().c_str() + pattern.length(), Color::grey);
+    printColor(completion.value().c_str() + pattern.length(), completionColor);
     cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
