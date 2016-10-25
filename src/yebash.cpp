@@ -180,7 +180,7 @@ unsigned char yebash(History const& history, History::const_iterator & historyPo
 } // namespace yb
 
 static inline bool is_terminal_input(int fd) {
-    return isatty(fd);
+    return isatty(fd) && fd == 0;
 }
 
 static inline void putCharToReadBuffer(char *buf) {
