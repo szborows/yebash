@@ -99,7 +99,7 @@ void printCompletion(History const& history, History::const_iterator & historyPo
     clearTerminalLine();
     if (offset)
         cursor_forward(offset);
-    printColor(completion.value().c_str() + pattern.length(), Color::red);
+    printColor(completion.value().c_str() + pattern.length(), Color::grey);
     cursor_backward(completion.value().length() - pattern.length() + offset);
     fflush(stdout);
 }
@@ -216,3 +216,4 @@ static void yebashInit()  {
     gHistory.read(historyFile);
     historyFile.close();
 }
+
