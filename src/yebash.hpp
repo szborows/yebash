@@ -4,7 +4,7 @@
 
 namespace yb {
 
-unsigned char yebash(History const& history, History::const_iterator & historyPos, unsigned char c);
+unsigned char yebash(History &history, unsigned char c);
 
 } // namespace yb
 
