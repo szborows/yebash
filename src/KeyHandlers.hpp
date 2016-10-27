@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Defs.hpp"
-#include "History.hpp"
+#include "HistorySuggestion.hpp"
 
 namespace yb {
 
-CharOpt arrowHandler1(History & history, Char);
+CharOpt arrowHandler1(HistorySuggestion & history, Char);
 
 } // namespace yb
 

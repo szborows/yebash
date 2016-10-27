@@ -42,17 +42,17 @@ using ColorOpt = std::experimental::optional<Color>;
 constexpr const Color defaultCompletionColor = Color::grey;
 thread_local ColorOpt completionColor = {};
 
-CharOpt newlineHandler(History &, Char);
-CharOpt tabHandler(History &, Char);
-CharOpt backspaceHandler(History &, Char);
-CharOpt regularCHarHandler(History &, Char);
-CharOpt arrowHandler1(History &, Char);
-CharOpt arrowHandler2(History &, Char);
-CharOpt arrowHandler3(History &, Char);
+CharOpt newlineHandler(HistorySuggestion &, Char);
+CharOpt tabHandler(HistorySuggestion &, Char);
+CharOpt backspaceHandler(HistorySuggestion &, Char);
+CharOpt regularCHarHandler(HistorySuggestion &, Char);
+CharOpt arrowHandler1(HistorySuggestion &, Char);
+CharOpt arrowHandler2(HistorySuggestion &, Char);
+CharOpt arrowHandler3(HistorySuggestion &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 
-thread_local std::map<Char, std::function<CharOpt(History &, Char)>> handlers = {
+thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
@@ -79,13 +79,13 @@ static inline void printColor(const char *buffer, ColorOpt color) {
     std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
 }
 
-void printCompletion(History &, int offset) {
+void printCompletion(HistorySuggestion &history, int offset) {
     std::string pattern(lineBuffer.data());
     StringOpt completion;
     if (offset)
-        completion = historySuggestion->findCompletion(pattern);
+        completion = history.findCompletion(pattern);
     else
-        completion = historySuggestion->findNextCompletion(pattern);
+        completion = history.findNextCompletion(pattern);
     if (!completion) {
         return;
     }
@@ -100,32 +100,32 @@ void printCompletion(History &, int offset) {
     std::cout << std::flush;
 }
 
-CharOpt newlineHandler(History &, Char) {
+CharOpt newlineHandler(HistorySuggestion &, Char) {
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
     return {};
 }
 
-CharOpt backspaceHandler(History &, Char) {
+CharOpt backspaceHandler(HistorySuggestion &, Char) {
     if (lineBufferPos != lineBuffer.begin()) {
         *(--lineBufferPos) = 0;
     }
     return {};
 }
 
-CharOpt regularCharHandler(History &history, Char c) {
+CharOpt regularCharHandler(HistorySuggestion &history, Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
     printCompletion(history, 1);
     return {};
 }
 
-CharOpt tabHandler(History &history, Char) {
+CharOpt tabHandler(HistorySuggestion &history, Char) {
     printCompletion(history, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(History &history, Char c) {
+CharOpt arrowHandler2(HistorySuggestion &history, Char c) {
     if (arrowIndicator == 1) {
         arrowIndicator = 2;
         return {};
@@ -135,7 +135,7 @@ CharOpt arrowHandler2(History &history, Char c) {
     }
 }
 
-CharOpt arrowHandler3(History &history, Char c) {
+CharOpt arrowHandler3(HistorySuggestion &history, Char c) {
     CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
@@ -154,7 +154,7 @@ CharOpt arrowHandler3(History &history, Char c) {
 
 namespace yb {
 
-unsigned char yebash(History &history, unsigned char c) {
+unsigned char yebash(HistorySuggestion &history, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
@@ -195,7 +195,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(gHistory, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }

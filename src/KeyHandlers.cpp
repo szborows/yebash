@@ -4,7 +4,7 @@ extern thread_local char arrowIndicator;
 
 namespace yb {
 
-CharOpt arrowHandler1(History &, Char) {
+CharOpt arrowHandler1(HistorySuggestion &, Char) {
     arrowIndicator = 1;
     return {};
 }
