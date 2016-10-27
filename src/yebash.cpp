@@ -9,8 +9,10 @@
 #include <map>
 #include <functional>
 #include <stdexcept>
+#include <memory>
 
 #include "yebash.hpp"
+#include "HistorySuggestion.hpp"
 #include "Defs.hpp"
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
@@ -48,6 +50,8 @@ CharOpt arrowHandler1(History &, Char);
 CharOpt arrowHandler2(History &, Char);
 CharOpt arrowHandler3(History &, Char);
 
+thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
+
 thread_local std::map<Char, std::function<CharOpt(History &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
@@ -75,13 +79,13 @@ static inline void printColor(const char *buffer, ColorOpt color) {
     std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
 }
 
-void printCompletion(History &history, int offset) {
+void printCompletion(History &, int offset) {
     std::string pattern(lineBuffer.data());
     StringOpt completion;
     if (offset)
-        completion = history.findCompletion(pattern);
+        completion = historySuggestion->findCompletion(pattern);
     else
-        completion = history.findNextCompletion(pattern);
+        completion = historySuggestion->findNextCompletion(pattern);
     if (!completion) {
         return;
     }
@@ -136,7 +140,7 @@ CharOpt arrowHandler3(History &history, Char c) {
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
         try {
-            printBuffer = history.getCurrentEntry()->substr(lineBufferPos - lineBuffer.begin());
+            printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
             printBufferPos = printBuffer.begin();
         } catch (...) {
             // FIXME:
@@ -207,5 +211,6 @@ static void yebashInit()  {
     }
     gHistory.read(historyFile);
     historyFile.close();
+    historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
 }
 
