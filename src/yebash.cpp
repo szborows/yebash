@@ -40,15 +40,15 @@ using ColorOpt = std::experimental::optional<Color>;
 constexpr const Color defaultCompletionColor = Color::grey;
 thread_local ColorOpt completionColor = {};
 
-CharOpt newlineHandler(History const&, History::const_iterator &, Char);
-CharOpt tabHandler(History const&, History::const_iterator &, Char);
-CharOpt backspaceHandler(History const&, History::const_iterator &, Char);
-CharOpt regularCHarHandler(History const&, History::const_iterator &, Char);
-CharOpt arrowHandler1(History const&, History::const_iterator &, Char);
-CharOpt arrowHandler2(History const&, History::const_iterator &, Char);
-CharOpt arrowHandler3(History const&, History::const_iterator &, Char);
+CharOpt newlineHandler(History &, Char);
+CharOpt tabHandler(History &, Char);
+CharOpt backspaceHandler(History &, Char);
+CharOpt regularCHarHandler(History &, Char);
+CharOpt arrowHandler1(History &, Char);
+CharOpt arrowHandler2(History &, Char);
+CharOpt arrowHandler3(History &, Char);
 
-thread_local std::map<Char, std::function<CharOpt(History const&, History::const_iterator &, Char)>> handlers = {
+thread_local std::map<Char, std::function<CharOpt(History &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
@@ -71,24 +71,17 @@ void clearTerminalLine() {
     deleteRows(width - pos);
 }
 
-StringOpt findCompletion(History const& history, History::const_iterator & historyPos, History::const_iterator start, const std::string &pattern) {
-    for (auto it = start; it != history.end(); it++) {
-        if (it->compare(0, pattern.length(), pattern) == 0) {
-            historyPos = it;
-            return *it;
-        }
-    }
-    historyPos = history.begin();
-    return {};
-}
-
 static inline void printColor(const char *buffer, ColorOpt color) {
     std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
 }
 
-void printCompletion(History const& history, History::const_iterator & historyPos, History::const_iterator startIterator, int offset) {
+void printCompletion(History &history, int offset) {
     std::string pattern(lineBuffer.data());
-    auto completion = findCompletion(history, historyPos, startIterator, pattern);
+    StringOpt completion;
+    if (offset)
+        completion = history.findCompletion(pattern);
+    else
+        completion = history.findNextCompletion(pattern);
     if (!completion) {
         return;
     }
@@ -103,75 +96,75 @@ void printCompletion(History const& history, History::const_iterator & historyPo
     std::cout << std::flush;
 }
 
-CharOpt newlineHandler(History const&, History::const_iterator &, Char) {
+CharOpt newlineHandler(History &, Char) {
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
     return {};
 }
 
-CharOpt backspaceHandler(History const&, History::const_iterator &, Char) {
+CharOpt backspaceHandler(History &, Char) {
     if (lineBufferPos != lineBuffer.begin()) {
         *(--lineBufferPos) = 0;
     }
     return {};
 }
 
-CharOpt regularCharHandler(History const& history, History::const_iterator & historyPos, Char c) {
+CharOpt regularCharHandler(History &history, Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
-    printCompletion(history, historyPos, history.begin(), 1);
+    printCompletion(history, 1);
     return {};
 }
 
-CharOpt tabHandler(History const& history, History::const_iterator & historyPos, Char) {
-    printCompletion(history, historyPos,  std::next(historyPos, 1), 0);
+CharOpt tabHandler(History &history, Char) {
+    printCompletion(history, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(History const& history, History::const_iterator & historyPos, Char c) {
+CharOpt arrowHandler2(History &history, Char c) {
     if (arrowIndicator == 1) {
         arrowIndicator = 2;
         return {};
     }
     else {
-        return regularCharHandler(history, historyPos, c);
+        return regularCharHandler(history, c);
     }
 }
 
-CharOpt arrowHandler3(History const& history, History::const_iterator & historyPos, Char c) {
+CharOpt arrowHandler3(History &history, Char c) {
     CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
         try {
-            printBuffer = historyPos->substr(lineBufferPos - lineBuffer.begin());
+            printBuffer = history.getCurrentEntry()->substr(lineBufferPos - lineBuffer.begin());
             printBufferPos = printBuffer.begin();
         } catch (...) {
             // FIXME:
         }
     }
     else {
-        return_value = regularCharHandler(history, historyPos, c);
+        return_value = regularCharHandler(history, c);
     }
     return return_value;
 }
 
 namespace yb {
 
-unsigned char yebash(History const& history, History::const_iterator & historyPos, unsigned char c) {
+unsigned char yebash(History &history, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
     auto handler = handlers[c];
     CharOpt cReturned;
     if (handler) {
-        cReturned = handler(history, historyPos, c);
+        cReturned = handler(history, c);
     }
     else {
         if (c < 0x20) {
-            newlineHandler(history, historyPos, c);
+            newlineHandler(history, c);
         }
         else {
-            regularCharHandler(history, historyPos, c);
+            regularCharHandler(history, c);
         }
     }
     return cReturned.value_or(c);
@@ -198,7 +191,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(gHistory, gHistoryPos, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(gHistory, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }

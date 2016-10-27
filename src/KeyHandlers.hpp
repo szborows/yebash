@@ -5,7 +5,7 @@
 
 namespace yb {
 
-CharOpt arrowHandler1(History const& history, History::const_iterator & historyPos, Char);
+CharOpt arrowHandler1(History & history, Char);
 
 } // namespace yb
 
