@@ -38,14 +38,6 @@ static thread_local ReadSignature realRead = nullptr;
 constexpr const Color defaultCompletionColor = Color::grey;
 thread_local ColorOpt completionColor = {};
 
-CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
-CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
-CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char);
-CharOpt regularCHarHandler(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler1(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler2(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
-
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
 
@@ -53,7 +45,7 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
-    {0x1b, yb::arrowHandler1},
+    {0x1b, arrowHandler1},
     {0x5b, arrowHandler2},
     {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
@@ -71,6 +63,8 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     }
     printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(defaultCompletionColor), offset);
 }
+
+namespace yb {
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
     lineBuffer.fill(0);
@@ -123,8 +117,6 @@ CharOpt arrowHandler3(HistorySuggestion &history, Printer &printer, Char c) {
     }
     return return_value;
 }
-
-namespace yb {
 
 unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char c) {
     // TODO: uncomment later
