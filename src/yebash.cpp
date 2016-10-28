@@ -62,10 +62,7 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
 void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     std::string pattern(lineBuffer.data());
     StringOpt completion;
-    if (offset)
-        completion = history.findSuggestion(pattern);
-    else
-        completion = history.findNextSuggestion(pattern);
+    completion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
     if (!completion) {
         return;
     }
