@@ -1,12 +1,10 @@
 #pragma once
 
 #include <experimental/optional>
-
-using Char = unsigned char;
-using CharOpt = std::experimental::optional<Char>;
-using StringOpt = std::experimental::optional<std::string>;
+#include <string>
 
 enum class Color {
+    reset = 0,
     grey = 2,
     black = 30,
     red = 31,
@@ -25,4 +23,9 @@ enum class Color {
     light_cyan = 96,
     white = 97
 };
+
+using Char = unsigned char;
+using CharOpt = std::experimental::optional<Char>;
+using StringOpt = std::experimental::optional<std::string>;
+using ColorOpt = std::experimental::optional<Color>;
 

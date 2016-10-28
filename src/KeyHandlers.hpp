@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Defs.hpp"
-#include "HistorySuggestion.hpp"
+#include "yebash.hpp"
 
 namespace yb {
 
-CharOpt arrowHandler1(HistorySuggestion & history, Char);
+CharOpt arrowHandler1(HistorySuggestion & history, Printer &, Char);
 
 } // namespace yb
 

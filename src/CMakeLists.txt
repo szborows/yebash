@@ -4,6 +4,7 @@ set(SOURCES
     KeyHandlers.cpp
     TerminalInfo.cpp
     HistorySuggestion.cpp
+    Printer.cpp
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "-shared -fPIC ${CMAKE_EXE_LINKER_FLAGS}")

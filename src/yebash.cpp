@@ -5,7 +5,6 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <string>
 #include <map>
 #include <functional>
 #include <stdexcept>
@@ -16,9 +15,7 @@
 #include "Defs.hpp"
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
-
-#define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
-#define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
+#include "Printer.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 
@@ -38,21 +35,21 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-using ColorOpt = std::experimental::optional<Color>;
 constexpr const Color defaultCompletionColor = Color::grey;
 thread_local ColorOpt completionColor = {};
 
-CharOpt newlineHandler(HistorySuggestion &, Char);
-CharOpt tabHandler(HistorySuggestion &, Char);
-CharOpt backspaceHandler(HistorySuggestion &, Char);
-CharOpt regularCHarHandler(HistorySuggestion &, Char);
-CharOpt arrowHandler1(HistorySuggestion &, Char);
-CharOpt arrowHandler2(HistorySuggestion &, Char);
-CharOpt arrowHandler3(HistorySuggestion &, Char);
+CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
+CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
+CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char);
+CharOpt regularCHarHandler(HistorySuggestion &, Printer &, Char);
+CharOpt arrowHandler1(HistorySuggestion &, Printer &, Char);
+CharOpt arrowHandler2(HistorySuggestion &, Printer &, Char);
+CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
+thread_local std::unique_ptr<Printer> printer = nullptr;
 
-thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Char)>> handlers = {
+thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
@@ -62,24 +59,7 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Char)>> h
     {0x7f, backspaceHandler}
 };
 
-static inline void deleteRows(int rows) {
-    std::cout << std::string(rows, ' ');
-    cursor_backward(rows);
-    std::cout << std::flush;
-}
-
-void clearTerminalLine() {
-    int pos, width;
-    if (!(pos = TerminalInfo::getCursorPosition())) return;
-    width = TerminalInfo::getWidth();
-    deleteRows(width - pos);
-}
-
-static inline void printColor(const char *buffer, ColorOpt color) {
-    std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
-}
-
-void printCompletion(HistorySuggestion &history, int offset) {
+void printCompletion(HistorySuggestion &history, Printer &printer, int offset) {
     std::string pattern(lineBuffer.data());
     StringOpt completion;
     if (offset)
@@ -92,50 +72,45 @@ void printCompletion(HistorySuggestion &history, int offset) {
     if (pattern.length() == completion.value().length()) {
         return;
     }
-    clearTerminalLine();
-    if (offset)
-        cursor_forward(offset);
-    printColor(completion.value().c_str() + pattern.length(), completionColor);
-    cursor_backward(completion.value().length() - pattern.length() + offset);
-    std::cout << std::flush;
+    printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(Color::grey), offset);
 }
 
-CharOpt newlineHandler(HistorySuggestion &, Char) {
+CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
     lineBuffer.fill(0);
     lineBufferPos = lineBuffer.begin();
     return {};
 }
 
-CharOpt backspaceHandler(HistorySuggestion &, Char) {
+CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char) {
     if (lineBufferPos != lineBuffer.begin()) {
         *(--lineBufferPos) = 0;
     }
     return {};
 }
 
-CharOpt regularCharHandler(HistorySuggestion &history, Char c) {
+CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
-    printCompletion(history, 1);
+    printCompletion(history, printer, 1);
     return {};
 }
 
-CharOpt tabHandler(HistorySuggestion &history, Char) {
-    printCompletion(history, 0);
+CharOpt tabHandler(HistorySuggestion &history, Printer &printer, Char) {
+    printCompletion(history, printer, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(HistorySuggestion &history, Char c) {
+CharOpt arrowHandler2(HistorySuggestion &history, Printer &printer, Char c) {
     if (arrowIndicator == 1) {
         arrowIndicator = 2;
         return {};
     }
     else {
-        return regularCharHandler(history, c);
+        return regularCharHandler(history, printer, c);
     }
 }
 
-CharOpt arrowHandler3(HistorySuggestion &history, Char c) {
+CharOpt arrowHandler3(HistorySuggestion &history, Printer &printer, Char c) {
     CharOpt return_value = {};
     if (arrowIndicator == 2) {
         arrowIndicator = 0;
@@ -147,28 +122,28 @@ CharOpt arrowHandler3(HistorySuggestion &history, Char c) {
         }
     }
     else {
-        return_value = regularCharHandler(history, c);
+        return_value = regularCharHandler(history, printer, c);
     }
     return return_value;
 }
 
 namespace yb {
 
-unsigned char yebash(HistorySuggestion &history, unsigned char c) {
+unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
     auto handler = handlers[c];
     CharOpt cReturned;
     if (handler) {
-        cReturned = handler(history, c);
+        cReturned = handler(history, printer, c);
     }
     else {
         if (c < 0x20) {
-            newlineHandler(history, c);
+            newlineHandler(history, printer, c);
         }
         else {
-            regularCharHandler(history, c);
+            regularCharHandler(history, printer, c);
         }
     }
     return cReturned.value_or(c);
@@ -195,7 +170,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
@@ -212,5 +187,6 @@ static void yebashInit()  {
     gHistory.read(historyFile);
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
+    printer = std::make_unique<Printer>(std::cout);
 }
 
