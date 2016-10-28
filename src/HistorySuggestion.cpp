@@ -13,11 +13,11 @@ StringOpt HistorySuggestion::find(const std::string &pattern, History::const_ite
     return {};
 }
 
-StringOpt HistorySuggestion::findCompletion(const std::string &pattern) {
+StringOpt HistorySuggestion::findSuggestion(const std::string &pattern) {
     return find(pattern, history_.begin());
 }
 
-StringOpt HistorySuggestion::findNextCompletion(const std::string &pattern) {
+StringOpt HistorySuggestion::findNextSuggestion(const std::string &pattern) {
     return find(pattern, std::next(position_, 1));
 }
 
