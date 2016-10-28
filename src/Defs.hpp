@@ -4,6 +4,7 @@
 #include <string>
 
 enum class Color {
+    reset = 0,
     grey = 2,
     black = 30,
     red = 31,
