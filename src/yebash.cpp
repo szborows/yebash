@@ -45,7 +45,7 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
-    {0x1b, arrowHandler1},
+    {0x1b, escapeHandler},
     {0x5b, arrowHandler2},
     {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
