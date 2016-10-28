@@ -12,6 +12,19 @@ struct Printer {
     void print(const char *text, Color color, int offset);
 
 private:
+
+    void printInColor(const char *buffer, Color color);
+    void deleteRows(int rows);
+    void clearTerminalLine();
+
+    inline void cursor_forward(int x) {
+        output_ << "\033[" << x << 'C';
+    }
+
+    inline void cursor_backward(int x) {
+        output_ << "\033[" << x << 'D';
+    }
+
     std::ostream &output_;
 
 };
