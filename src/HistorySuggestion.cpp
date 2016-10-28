@@ -5,7 +5,7 @@ namespace yb {
 StringOpt HistorySuggestion::find(const std::string &pattern, History::const_iterator start) {
     for (auto it = start; it != history_.end(); ++it) {
         if (it->compare(0, pattern.length(), pattern) == 0) {
-            if (*position_ == *it) continue; // TODO: remove the last whitespace
+            if (*position_ == *it && start != history_.begin()) continue;
             position_ = it;
             return *it;
         }
