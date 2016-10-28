@@ -1,10 +1,10 @@
 #pragma once
 
-#include "History.hpp"
+#include "HistorySuggestion.hpp"
 
 namespace yb {
 
-unsigned char yebash(History &history, unsigned char c);
+unsigned char yebash(HistorySuggestion &history, unsigned char c);
 
 } // namespace yb
 
