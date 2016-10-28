@@ -5,7 +5,6 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <string>
 #include <map>
 #include <functional>
 #include <stdexcept>
@@ -17,9 +16,6 @@
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
-
-#define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
-#define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
 
 // https://www.akkadia.org/drepper/tls.pdf
 
@@ -39,7 +35,6 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-using ColorOpt = std::experimental::optional<Color>;
 constexpr const Color defaultCompletionColor = Color::grey;
 thread_local ColorOpt completionColor = {};
 
@@ -52,6 +47,7 @@ CharOpt arrowHandler2(HistorySuggestion &, Char);
 CharOpt arrowHandler3(HistorySuggestion &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
+thread_local std::unique_ptr<Printer> printer = nullptr;
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Char)>> handlers = {
     {0x06, tabHandler},
@@ -62,23 +58,6 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Char)>> h
     {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
 };
-
-static inline void deleteRows(int rows) {
-    std::cout << std::string(rows, ' ');
-    cursor_backward(rows);
-    std::cout << std::flush;
-}
-
-void clearTerminalLine() {
-    int pos, width;
-    if (!(pos = TerminalInfo::getCursorPosition())) return;
-    width = TerminalInfo::getWidth();
-    deleteRows(width - pos);
-}
-
-static inline void printColor(const char *buffer, ColorOpt color) {
-    std::cout << "\e[" << static_cast<int>(color.value_or(defaultCompletionColor)) << 'm' << buffer << "\e[0m";
-}
 
 void printCompletion(HistorySuggestion &history, int offset) {
     std::string pattern(lineBuffer.data());
@@ -93,12 +72,7 @@ void printCompletion(HistorySuggestion &history, int offset) {
     if (pattern.length() == completion.value().length()) {
         return;
     }
-    clearTerminalLine();
-    if (offset)
-        cursor_forward(offset);
-    printColor(completion.value().c_str() + pattern.length(), completionColor);
-    cursor_backward(completion.value().length() - pattern.length() + offset);
-    std::cout << std::flush;
+    printer->print(completion.value().c_str() + pattern.length(), completionColor.value_or(Color::grey), offset);
 }
 
 CharOpt newlineHandler(HistorySuggestion &, Char) {
@@ -213,5 +187,6 @@ static void yebashInit()  {
     gHistory.read(historyFile);
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
+    printer = std::make_unique<Printer>(std::cout);
 }
 
