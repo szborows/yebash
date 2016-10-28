@@ -16,6 +16,7 @@
 #include "Defs.hpp"
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
+#include "Printer.hpp"
 
 #define cursor_forward(x) printf("\033[%dC", static_cast<int>(x))
 #define cursor_backward(x) printf("\033[%dD", static_cast<int>(x))
