@@ -16,6 +16,7 @@
 #include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
+#include "StateMachine.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 
@@ -40,6 +41,12 @@ thread_local ColorOpt completionColor = {};
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
+
+thread_local StateMachine<char, char> escapeMachine {
+    StateTransition<char, char>(0x1b, 0, 0x1b, nullptr),
+    StateTransition<char, char>(0x5b, 0x1b, 0x5b, nullptr),
+    StateTransition<char, char>(0x43, 0x5b, 0, nullptr)
+};
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
