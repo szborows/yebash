@@ -59,13 +59,10 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
     {0x7f, backspaceHandler}
 };
 
-void printCompletion(HistorySuggestion &history, Printer &printer, int offset) {
+void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     std::string pattern(lineBuffer.data());
     StringOpt completion;
-    if (offset)
-        completion = history.findCompletion(pattern);
-    else
-        completion = history.findNextCompletion(pattern);
+    completion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
     if (!completion) {
         return;
     }
@@ -91,12 +88,12 @@ CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char) {
 CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, Char c) {
     *lineBufferPos = c;
     lineBufferPos++;
-    printCompletion(history, printer, 1);
+    printSuggestion(history, printer, 1);
     return {};
 }
 
 CharOpt tabHandler(HistorySuggestion &history, Printer &printer, Char) {
-    printCompletion(history, printer, 0);
+    printSuggestion(history, printer, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
 
