@@ -42,10 +42,12 @@ thread_local ColorOpt completionColor = {};
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
 
+void rightArrow();
+
 thread_local StateMachine<char, char> escapeMachine {
     StateTransition<char, char>(0x1b, 0, 0x1b, nullptr),
     StateTransition<char, char>(0x5b, 0x1b, 0x5b, nullptr),
-    StateTransition<char, char>(0x43, 0x5b, 0, nullptr)
+    StateTransition<char, char>(0x43, 0x5b, 0, rightArrow)
 };
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
@@ -53,8 +55,8 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
     {0x1b, escapeHandler},
-    {0x5b, arrowHandler2},
-    {0x43, arrowHandler3},
+    {0x5b, escapeHandler},
+    {0x43, escapeHandler},
     {0x7f, backspaceHandler}
 };
 
@@ -69,6 +71,16 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
         return;
     }
     printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(defaultCompletionColor), offset);
+}
+
+void rightArrow() {
+    try {
+        printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
+        printBufferPos = printBuffer.begin();
+    }
+    catch (...) {
+        // FIXME:
+    }
 }
 
 namespace yb {
@@ -98,31 +110,14 @@ CharOpt tabHandler(HistorySuggestion &history, Printer &printer, Char) {
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(HistorySuggestion &history, Printer &printer, Char c) {
-    if (arrowIndicator == 1) {
-        arrowIndicator = 2;
+CharOpt escapeHandler(HistorySuggestion &history, Printer &printer, Char c) {
+    if (escapeMachine.trigger(c)) {
         return {};
     }
-    else {
+    else if (c > 0x20) {
         return regularCharHandler(history, printer, c);
     }
-}
-
-CharOpt arrowHandler3(HistorySuggestion &history, Printer &printer, Char c) {
-    CharOpt return_value = {};
-    if (arrowIndicator == 2) {
-        arrowIndicator = 0;
-        try {
-            printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
-            printBufferPos = printBuffer.begin();
-        } catch (...) {
-            // FIXME:
-        }
-    }
-    else {
-        return_value = regularCharHandler(history, printer, c);
-    }
-    return return_value;
+    return {};
 }
 
 unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char c) {
