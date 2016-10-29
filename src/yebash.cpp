@@ -31,8 +31,6 @@ thread_local std::string::iterator printBufferPos;
 thread_local History gHistory;
 thread_local History::const_iterator gHistoryPos;
 
-thread_local char arrowIndicator = 0;
-
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
