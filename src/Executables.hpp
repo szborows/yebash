@@ -2,6 +2,10 @@
 
 #include <list>
 #include <string>
+#include <experimental/filesystem>
+#include <iostream>
+
+namespace fs = std::experimental::filesystem;
 
 class Executables {
 
@@ -9,7 +13,15 @@ class Executables {
 
 public:
 
-    explicit inline Executables(const std::initializer_list<std::string> &/*list*/) {}
+    explicit Executables(const std::initializer_list<std::string> &list) {
+        for (const auto &path : list) {
+            for (const auto &f : fs::directory_iterator(path)) {
+                entries_.push_back(f.path().filename());
+            }
+        }
+    }
+
+    bool find(std::string name);
 
 };
 

@@ -15,6 +15,7 @@
 #include "Defs.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
+#include "Executables.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 // http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
@@ -186,5 +187,6 @@ static void yebashInit()  {
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
     printer = std::make_unique<Printer>(std::cout);
+    Executables execs{"/usr/bin"};
 }
 
