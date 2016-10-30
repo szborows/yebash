@@ -21,7 +21,7 @@ public:
         }
     }
 
-    bool find(std::string name);
+    bool find(const std::string &name) const;
 
 };
 
