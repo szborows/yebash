@@ -164,6 +164,7 @@ static inline void putCharToReadBuffer(char *buf) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
+    // TODO: that's a good place to run syntax "colorizer"
     if (is_terminal_input(fd) && printBuffer.length()) {
         putCharToReadBuffer(static_cast<char *>(buf));
         return 1;
