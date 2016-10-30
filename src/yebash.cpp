@@ -128,12 +128,7 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char
         cReturned = handler(history, printer, c);
     }
     else {
-        if (c < 0x20) {
-            newlineHandler(history, printer, c);
-        }
-        else {
-            regularCharHandler(history, printer, c);
-        }
+        c < 0x20 ? newlineHandler(history, printer, c) : regularCharHandler(history, printer, c);
     }
     return cReturned.value_or(c);
 }
