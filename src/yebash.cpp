@@ -50,6 +50,7 @@ CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
+thread_local std::unique_ptr<Executables> executables = nullptr;
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
@@ -187,6 +188,7 @@ static void yebashInit()  {
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
     printer = std::make_unique<Printer>(std::cout);
-    Executables execs{"/usr/bin"};
+    std::initializer_list<std::string> paths{"/usr/bin"};
+    executables = std::make_unique<Executables>(paths);
 }
 
