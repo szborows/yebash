@@ -6,6 +6,7 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - g++-6
+            - libboost-all-dev
             - valgrind
 
 compiler: g++-6
