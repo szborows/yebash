@@ -69,7 +69,7 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     if (pattern.length() == completion.value().length()) {
         return;
     }
-    printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(Color::grey), offset);
+    printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(defaultCompletionColor), offset);
 }
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
