@@ -17,6 +17,7 @@ cache:
 
 language: cpp
 script:
+    - touch ~/.bash_history
     - mkdir -p build && cd build
     - CXX=g++-6 CC=gcc-6 cmake ..
     - make
