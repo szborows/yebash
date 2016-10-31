@@ -17,6 +17,8 @@
 #include "Printer.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
+// http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
+// http://www.linusakesson.net/programming/tty/
 
 using namespace yb;
 
