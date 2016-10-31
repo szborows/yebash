@@ -1,5 +1,5 @@
 project(yebash CXX)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 if (ASAN)
     set(ADDITIONAL_CXX_FLAGS "-fsanitize=address")
