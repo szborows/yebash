@@ -62,16 +62,15 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
 
 void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     std::string pattern(lineBuffer.data());
-    StringOpt completion;
-    completion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
-    if (!completion) {
+    auto suggestion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
+    if (!suggestion) {
         printer.clearTerminalLine();
         return;
     }
-    if (pattern.length() == completion.value().length()) {
+    if (pattern.length() == suggestion.value().length()) {
         return;
     }
-    printer.print(completion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
+    printer.print(suggestion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
 }
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
