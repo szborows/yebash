@@ -15,8 +15,8 @@ void Printer::deleteRows(int rows) {
 
 void Printer::clearTerminalLine() {
     int pos, width;
-    if (!(pos = TerminalInfo::getCursorPosition())) return;
-    width = TerminalInfo::getWidth();
+    if (!(pos = terminalInfo_.getCursorPosition())) return;
+    width = terminalInfo_.getWidth();
     deleteRows(width - pos);
 }
 

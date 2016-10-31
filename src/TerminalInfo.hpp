@@ -2,9 +2,15 @@
 
 namespace yb {
 
-struct TerminalInfo {
-    static int getCursorPosition();
-    static int getWidth();
+class TerminalInfo {
+
+    int cursorRow;
+
+public:
+
+    int getCursorPosition();
+    int getWidth();
+
 };
 
 } // namespace yb
