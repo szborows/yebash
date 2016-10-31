@@ -6,12 +6,6 @@
 
 namespace yb {
 
-void Printer::deleteRows(int rows) {
-    output_ << std::string(rows, ' ');
-    cursor_backward(rows);
-    output_ << std::flush;
-}
-
 void Printer::clearTerminalLine() {
     output_ << "\033[K";
     output_ << std::flush;

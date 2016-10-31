@@ -14,7 +14,6 @@ struct Printer {
 private:
 
     void printInColor(const char *buffer, Color color);
-    void deleteRows(int rows);
 
     inline void cursor_forward(int x) {
         output_ << "\033[" << x << 'C';
