@@ -35,8 +35,8 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-constexpr const Color defaultCompletionColor = Color::grey;
-thread_local ColorOpt completionColor = {};
+constexpr const Color defaultSuggestionColor = Color::grey;
+thread_local ColorOpt suggestionColor = {};
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
 CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
@@ -69,7 +69,7 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     if (pattern.length() == completion.value().length()) {
         return;
     }
-    printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(defaultCompletionColor), offset);
+    printer.print(completion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
 }
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
