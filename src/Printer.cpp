@@ -7,8 +7,9 @@
 namespace yb {
 
 void Printer::clearTerminalLine() {
-    output_ << "\033[K";
-    output_ << std::flush;
+    if (&output_ == &std::cout) {
+       output_ << "\033[K" << std::flush;
+    }
 }
 
 void Printer::printInColor(const char *buffer, Color color) {
