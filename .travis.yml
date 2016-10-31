@@ -1,0 +1,11 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+script:
+  - mkdir build
+  - cd build
+  - cmake .. && make
+
+# TODO(szborows): support for modern C++ is described here:
+#  http://genbattle.bitbucket.org/blog/2016/01/17/c++-travis-ci/
