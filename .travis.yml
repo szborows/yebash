@@ -6,7 +6,7 @@ compiler:
 before_install:
   - if [ "$CXX" == "clang++" ]; then sudo wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -; fi
   - if [ "$CXX" == "clang++" ]; then sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial main"; fi
-  - sudo apt-get update -qq
+  - sudo apt-get update
 
 install:
   - if [ "$CXX" == "clang++" ]; then sudo apt-get install clang-3.9 lldb-3.9; fi
