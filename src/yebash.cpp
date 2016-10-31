@@ -64,6 +64,7 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     StringOpt completion;
     completion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
     if (!completion) {
+        printer.clearTerminalLine();
         return;
     }
     if (pattern.length() == completion.value().length()) {
