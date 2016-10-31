@@ -72,4 +72,55 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     tearDown();
 }
 
+TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 
+    History history = createHistory({"a", "ab", "abc", "abcd", "bcd"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    Printer printer(output);
+
+    yebash(suggestion, printer, 'a');
+
+    SECTION( "one switch" ) {
+        auto result = yebash(suggestion, printer, 0x06);
+        REQUIRE(result == 0);
+        REQUIRE(output.str() == "bcdbc");
+    }
+
+    SECTION( "two switches" ) {
+        yebash(suggestion, printer, 0x06);
+        auto result = yebash(suggestion, printer, 0x06);
+        REQUIRE(result == 0);
+        REQUIRE(output.str() == "bcdbcb");
+    }
+
+    SECTION( "third switch to empty suggestion" ) {
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        auto result = yebash(suggestion, printer, 0x06);
+        REQUIRE(result == 0);
+        REQUIRE(output.str() == "bcdbcb");
+    }
+
+    SECTION( "nothing more suggestions" ) {
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        auto result = yebash(suggestion, printer, 0x06);
+        REQUIRE(result == 0);
+        REQUIRE(output.str() == "bcdbcb");
+    }
+
+    SECTION( "go back to the first suggestion" ) {
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        yebash(suggestion, printer, 0x06);
+        auto result = yebash(suggestion, printer, 0x06);
+        REQUIRE(result == 0);
+        REQUIRE(output.str() == "bcdbcbbcd");
+    }
+
+    tearDown();
+}
