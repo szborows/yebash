@@ -7,3 +7,4 @@ bool Executables::find(const std::string &name) const {
     }
     return false;
 }
+
