@@ -2,7 +2,6 @@ set(SOURCES
     yebash.cpp
     History.cpp
     KeyHandlers.cpp
-    TerminalInfo.cpp
     HistorySuggestion.cpp
     Printer.cpp
 )

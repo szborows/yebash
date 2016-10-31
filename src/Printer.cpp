@@ -1,5 +1,4 @@
 #include "Printer.hpp"
-#include "TerminalInfo.hpp"
 #include <cstring>
 #include <iostream>
 
@@ -14,10 +13,8 @@ void Printer::deleteRows(int rows) {
 }
 
 void Printer::clearTerminalLine() {
-    int pos, width;
-    if (!(pos = terminalInfo_.getCursorPosition())) return;
-    width = terminalInfo_.getWidth();
-    deleteRows(width - pos);
+    output_ << "\033[K";
+    output_ << std::flush;
 }
 
 void Printer::printInColor(const char *buffer, Color color) {

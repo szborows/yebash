@@ -13,7 +13,6 @@
 #include "yebash.hpp"
 #include "HistorySuggestion.hpp"
 #include "Defs.hpp"
-#include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
 
@@ -48,7 +47,6 @@ CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
-thread_local std::unique_ptr<TerminalInfo> terminalInfo = nullptr;
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
@@ -186,7 +184,6 @@ static void yebashInit()  {
     gHistory.read(historyFile);
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
-    terminalInfo = std::make_unique<TerminalInfo>();
-    printer = std::make_unique<Printer>(std::cout, *terminalInfo);
+    printer = std::make_unique<Printer>(std::cout);
 }
 

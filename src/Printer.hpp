@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Defs.hpp"
-#include "TerminalInfo.hpp"
 #include <iostream>
 
 namespace yb {
 
 struct Printer {
 
-    explicit Printer(std::ostream &output, TerminalInfo &terminalInfo) : output_(output), terminalInfo_(terminalInfo) {}
+    explicit Printer(std::ostream &output) : output_(output) {}
     void print(const char *text, Color color, int offset);
     void clearTerminalLine();
 
@@ -26,7 +25,6 @@ private:
     }
 
     std::ostream &output_;
-    TerminalInfo &terminalInfo_;
 
 };
 
