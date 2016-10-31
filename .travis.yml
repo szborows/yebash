@@ -8,17 +8,20 @@ addons:
             - g++-6
             - libboost-all-dev
             - valgrind
-
-compiler: g++-6
+            - clang-3.8
 
 cache:
     - ccache
     - packages
 
+matrix:
+    include:
+        - env: COMPILER=g++-6
+        - env: COMPILER=clang++-3.8
+
 language: cpp
 script:
     - touch ~/.bash_history
     - mkdir -p build && cd build
-    - CXX=g++-6 CC=gcc-6 cmake ..
-    - make
+    - CXX=$COMPILER cmake .. && make
     - ./test/tests
