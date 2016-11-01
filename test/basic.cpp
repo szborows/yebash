@@ -154,3 +154,29 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 
     tearDown();
 }
+
+
+TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
+
+    History history = createHistory({"12345", "xyz"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    Printer printer(output);
+
+    constexpr char backspace = 0x7f;
+
+    SECTION( "start" ) {
+        yebash(suggestion, printer, '1');
+        REQUIRE(output.str() == "2345");
+    }
+
+    SECTION( "backspaces that could possibly break something" ) {
+        for (int i = 0; i < 1 << 10; ++i) {
+            yebash(suggestion, printer, backspace);
+        }
+        REQUIRE(output.str() == "");
+    }
+
+    tearDown();
+}
