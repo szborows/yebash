@@ -7,7 +7,7 @@ if (ASAN)
 endif()
 
 if (COVERAGE)
-    set(ADDITIONAL_CXX_FLAGS "${ADDITIONAL_CXX_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+    set(ADDITIONAL_CXX_FLAGS "${ADDITIONAL_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     set(ADDITIONAL_LD_FLAGS "${ADDITIONAL_LD_FLAGS} -lgcov")
 endif()
 
