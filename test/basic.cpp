@@ -134,23 +134,17 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 
     constexpr char backspace = 0x7f;
 
-    SECTION( "go through history -> 1234" ) {
-        yebash(suggestion, printer, '1');
-        yebash(suggestion, printer, '2');
-        yebash(suggestion, printer, '3');
-        yebash(suggestion, printer, '4');
-        REQUIRE(output.str() == "2335");
-    }
+    yebash(suggestion, printer, '1');
+    yebash(suggestion, printer, '2');
+    yebash(suggestion, printer, '3');
+    yebash(suggestion, printer, '4');
+    REQUIRE(output.str() == "2335");
 
-    SECTION( "backspace -> 123" ) {
-        yebash(suggestion, printer, backspace);
-        REQUIRE(output.str() == "");
-    }
+    yebash(suggestion, printer, backspace);
+    REQUIRE(output.str() == "2335");
 
-    SECTION( "go forward again" ) {
-        auto result = yebash(suggestion, printer, '4');
-        REQUIRE(output.str() == "5");
-    }
+    yebash(suggestion, printer, '4');
+    REQUIRE(output.str() == "23355");
 
     tearDown();
 }
@@ -166,17 +160,13 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
 
     constexpr char backspace = 0x7f;
 
-    SECTION( "start" ) {
-        yebash(suggestion, printer, '1');
-        REQUIRE(output.str() == "2345");
-    }
+    yebash(suggestion, printer, '1');
+    REQUIRE(output.str() == "2345");
 
-    SECTION( "backspaces that could possibly break something" ) {
-        for (int i = 0; i < 1 << 10; ++i) {
-            yebash(suggestion, printer, backspace);
-        }
-        REQUIRE(output.str() == "");
+    for (int i = 0; i < 1 << 10; ++i) {
+        yebash(suggestion, printer, backspace);
     }
+    REQUIRE(output.str() == "2345");
 
     tearDown();
 }
