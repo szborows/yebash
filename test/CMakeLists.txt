@@ -5,3 +5,13 @@ set(SOURCES
 
 add_executable(tests ${SOURCES})
 target_link_libraries(tests yebash)
+
+add_custom_target(tests-run DEPENDS tests COMMAND ./tests)
+
+if (COVERAGE)
+    add_custom_target(tests-cov
+        DEPENDS tests-run
+        COMMAND gcovr -r ../../src ..
+        COMMAND gcovr --html --html-details -o coverage.html -r ../../src ..)
+endif()
+
