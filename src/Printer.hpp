@@ -9,12 +9,11 @@ struct Printer {
 
     explicit Printer(std::ostream &output) : output_(output) {}
     void print(const char *text, Color color, int offset);
+    void clearTerminalLine();
 
 private:
 
     void printInColor(const char *buffer, Color color);
-    void deleteRows(int rows);
-    void clearTerminalLine();
 
     inline void cursor_forward(int x) {
         output_ << "\033[" << x << 'C';

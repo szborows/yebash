@@ -1,5 +1,4 @@
 #include "Printer.hpp"
-#include "TerminalInfo.hpp"
 #include <cstring>
 #include <iostream>
 
@@ -7,17 +6,10 @@
 
 namespace yb {
 
-void Printer::deleteRows(int rows) {
-    output_ << std::string(rows, ' ');
-    cursor_backward(rows);
-    output_ << std::flush;
-}
-
 void Printer::clearTerminalLine() {
-    int pos, width;
-    if (!(pos = TerminalInfo::getCursorPosition())) return;
-    width = TerminalInfo::getWidth();
-    deleteRows(width - pos);
+    if (&output_ == &std::cout) {
+       output_ << "\033[K" << std::flush;
+    }
 }
 
 void Printer::printInColor(const char *buffer, Color color) {

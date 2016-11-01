@@ -13,11 +13,12 @@
 #include "yebash.hpp"
 #include "HistorySuggestion.hpp"
 #include "Defs.hpp"
-#include "TerminalInfo.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
+// http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
+// http://www.linusakesson.net/programming/tty/
 
 using namespace yb;
 
@@ -35,8 +36,8 @@ thread_local char arrowIndicator = 0;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-constexpr const Color defaultCompletionColor = Color::grey;
-thread_local ColorOpt completionColor = {};
+constexpr const Color defaultSuggestionColor = Color::grey;
+thread_local ColorOpt suggestionColor = {};
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
 CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
@@ -61,15 +62,15 @@ thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &
 
 void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     std::string pattern(lineBuffer.data());
-    StringOpt completion;
-    completion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
-    if (!completion) {
+    auto suggestion = offset ? history.findSuggestion(pattern) : history.findNextSuggestion(pattern);
+    if (!suggestion) {
+        printer.clearTerminalLine();
         return;
     }
-    if (pattern.length() == completion.value().length()) {
+    if (pattern.length() == suggestion.value().length()) {
         return;
     }
-    printer.print(completion.value().c_str() + pattern.length(), completionColor.value_or(defaultCompletionColor), offset);
+    printer.print(suggestion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
 }
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
