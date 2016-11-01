@@ -4,3 +4,6 @@
 [![codecov](https://codecov.io/gh/szborows/yebash/branch/master/graph/badge.svg)](https://codecov.io/gh/szborows/yebash)
 
 your enhanced bash ;-)
+
+Features:
+* fish-like completions
