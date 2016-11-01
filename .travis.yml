@@ -9,6 +9,7 @@ addons:
             - libboost-all-dev
             - valgrind
             - clang-3.8
+            - gcovr
 
 cache:
     - ccache
