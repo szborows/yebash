@@ -122,3 +122,35 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 
     tearDown();
 }
+
+
+TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
+
+    History history = createHistory({"12345", "def", "trolo", "abc", "123"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    Printer printer(output);
+
+    constexpr char backspace = 0x7f;
+
+    SECTION( "go through history -> 1234" ) {
+        yebash(suggestion, printer, '1');
+        yebash(suggestion, printer, '2');
+        yebash(suggestion, printer, '3');
+        yebash(suggestion, printer, '4');
+        REQUIRE(output.str() == "2335");
+    }
+
+    SECTION( "backspace -> 123" ) {
+        yebash(suggestion, printer, backspace);
+        REQUIRE(output.str() == "");
+    }
+
+    SECTION( "go forward again" ) {
+        auto result = yebash(suggestion, printer, '4');
+        REQUIRE(output.str() == "5");
+    }
+
+    tearDown();
+}
