@@ -72,6 +72,14 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     tearDown();
 }
 
+unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, int n) {
+    unsigned char result;
+    for (int i = 0; i < n; i++) {
+        result = yebash(suggestion, printer, 0x06);
+    }
+    return result;
+}
+
 TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 
     History history = createHistory({"a", "ab", "abc", "abcd", "bcd"});
@@ -83,41 +91,31 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
     yebash(suggestion, printer, 'a');
 
     SECTION( "one switch" ) {
-        auto result = yebash(suggestion, printer, 0x06);
+        auto result = rollSuggestions(suggestion, printer, 1);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbc");
     }
 
     SECTION( "two switches" ) {
-        yebash(suggestion, printer, 0x06);
-        auto result = yebash(suggestion, printer, 0x06);
+        auto result = rollSuggestions(suggestion, printer, 2);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
     SECTION( "third switch to empty suggestion" ) {
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        auto result = yebash(suggestion, printer, 0x06);
+        auto result = rollSuggestions(suggestion, printer, 3);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
-    SECTION( "nothing more suggestions" ) {
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        auto result = yebash(suggestion, printer, 0x06);
+    SECTION( "no more suggestions" ) {
+        auto result = rollSuggestions(suggestion, printer, 4);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
     SECTION( "go back to the first suggestion" ) {
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        yebash(suggestion, printer, 0x06);
-        auto result = yebash(suggestion, printer, 0x06);
+        auto result = rollSuggestions(suggestion, printer, 5);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcbbcd");
     }
