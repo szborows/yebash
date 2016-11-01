@@ -11,6 +11,10 @@ addons:
             - clang-3.8
             - gcovr
 
+
+install:
+    - sudo pip install codecov
+
 cache:
     - ccache
     - packages
@@ -27,4 +31,5 @@ script:
     - CXX=$COMPILER cmake -DCOVERAGE=1 .. && make tests-cov
 
 after_success:
-    - bash <(curl -s https://codecov.io/bash)
+    - codecov
+
