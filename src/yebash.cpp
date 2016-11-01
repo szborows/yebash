@@ -5,10 +5,10 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <map>
 #include <functional>
 #include <stdexcept>
 #include <memory>
+#include <unordered_map>
 
 #include "yebash.hpp"
 #include "HistorySuggestion.hpp"
@@ -50,7 +50,7 @@ CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
 
-thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
+thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
