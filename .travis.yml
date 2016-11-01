@@ -1,18 +1,13 @@
 sudo: required
 dist: trusty
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - g++-6
-            - libboost-all-dev
-            - valgrind
-            - clang-3.8
 
-cache:
-    - ccache
-    - packages
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+  
+install:
+    - sudo apt-get install g++-6 libboost-all-dev valgrind clang-3.8 gcovr
+    - sudo pip install codecov
 
 matrix:
     include:
@@ -23,5 +18,7 @@ language: cpp
 script:
     - touch ~/.bash_history
     - mkdir -p build && cd build
-    - CXX=$COMPILER cmake .. && make
-    - ./test/tests
+    - CXX=$COMPILER cmake -DCOVERAGE=ON .. && make tests-cov
+
+after_success:
+    - codecov

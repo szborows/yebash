@@ -6,6 +6,11 @@ if (ASAN)
     set(ADDITIONAL_LD_FLAGS "-lasan")
 endif()
 
+if (COVERAGE)
+    set(ADDITIONAL_CXX_FLAGS "${ADDITIONAL_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(ADDITIONAL_LD_FLAGS "${ADDITIONAL_LD_FLAGS} -lgcov")
+endif()
+
 set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -Werror -Wextra ${ADDITIONAL_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${ADDITIONAL_LD_FLAGS}")
 
