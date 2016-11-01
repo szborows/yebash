@@ -15,6 +15,7 @@
 #include "Defs.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
+#include "StateMachine.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 // http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
@@ -31,32 +32,30 @@ thread_local std::string::iterator printBufferPos;
 thread_local History gHistory;
 thread_local History::const_iterator gHistoryPos;
 
-thread_local char arrowIndicator = 0;
-
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
 constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
 
-CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
-CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
-CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char);
-CharOpt regularCHarHandler(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler1(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler2(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
-
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
+
+void rightArrow();
+
+thread_local StateMachine<char, char> escapeMachine {
+    StateTransition<char, char>(0x1b, 0, 0x1b, nullptr),
+    StateTransition<char, char>(0x5b, 0x1b, 0x5b, nullptr),
+    StateTransition<char, char>(0x43, 0x5b, 0, rightArrow)
+};
 
 thread_local std::map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
-    {0x1b, yb::arrowHandler1},
-    {0x5b, arrowHandler2},
-    {0x43, arrowHandler3},
+    {0x1b, escapeHandler},
+    {0x5b, escapeHandler},
+    {0x43, escapeHandler},
     {0x7f, backspaceHandler}
 };
 
@@ -72,6 +71,18 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, int offset) {
     }
     printer.print(suggestion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
 }
+
+void rightArrow() {
+    try {
+        printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
+        printBufferPos = printBuffer.begin();
+    }
+    catch (...) {
+        // FIXME:
+    }
+}
+
+namespace yb {
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char) {
     lineBuffer.fill(0);
@@ -98,34 +109,15 @@ CharOpt tabHandler(HistorySuggestion &history, Printer &printer, Char) {
     return Char{0}; // TODO: this does not seem to work.
 }
 
-CharOpt arrowHandler2(HistorySuggestion &history, Printer &printer, Char c) {
-    if (arrowIndicator == 1) {
-        arrowIndicator = 2;
+CharOpt escapeHandler(HistorySuggestion &history, Printer &printer, Char c) {
+    if (escapeMachine.trigger(c)) {
         return {};
     }
-    else {
+    else if (c > 0x20) {
         return regularCharHandler(history, printer, c);
     }
+    return {};
 }
-
-CharOpt arrowHandler3(HistorySuggestion &history, Printer &printer, Char c) {
-    CharOpt return_value = {};
-    if (arrowIndicator == 2) {
-        arrowIndicator = 0;
-        try {
-            printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
-            printBufferPos = printBuffer.begin();
-        } catch (...) {
-            // FIXME:
-        }
-    }
-    else {
-        return_value = regularCharHandler(history, printer, c);
-    }
-    return return_value;
-}
-
-namespace yb {
 
 unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char c) {
     // TODO: uncomment later
@@ -137,12 +129,7 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char
         cReturned = handler(history, printer, c);
     }
     else {
-        if (c < 0x20) {
-            newlineHandler(history, printer, c);
-        }
-        else {
-            regularCharHandler(history, printer, c);
-        }
+        c < 0x20 ? newlineHandler(history, printer, c) : regularCharHandler(history, printer, c);
     }
     return cReturned.value_or(c);
 }

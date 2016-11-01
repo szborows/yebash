@@ -11,7 +11,7 @@ struct HistorySuggestion {
     StringOpt findSuggestion(const std::string &pattern);
     StringOpt findNextSuggestion(const std::string &pattern);
 
-    auto &get() { return *position_; }
+    const auto &get() const { return *position_; }
 
 private:
     StringOpt find(const std::string &pattern, History::const_iterator start);
