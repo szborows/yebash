@@ -13,6 +13,5 @@ if (COVERAGE)
     add_custom_target(tests-cov
         DEPENDS clean-coverage tests-run
         COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR})
-        # COMMAND gcovr --html --html-details -o coverage.html -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR})
 endif()
 
