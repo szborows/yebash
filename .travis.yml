@@ -24,7 +24,7 @@ script:
     - touch ~/.bash_history
     - mkdir -p build && cd build
     - CXX=$COMPILER cmake -DCOVERAGE=1 .. && make
-    - ./tests-cov
+    - make tests-cov
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
