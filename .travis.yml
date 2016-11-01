@@ -25,3 +25,6 @@ script:
     - mkdir -p build && cd build
     - CXX=$COMPILER cmake .. && make
     - ./test/tests
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
