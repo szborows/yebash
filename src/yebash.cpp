@@ -15,6 +15,7 @@
 #include "Defs.hpp"
 #include "KeyHandlers.hpp"
 #include "Printer.hpp"
+#include "ArrowHandler.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 // http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
