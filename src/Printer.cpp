@@ -3,6 +3,7 @@
 #include <iostream>
 
 // TODO: change "if (&output_ == &std::cout)" to something more convenient or move it out
+// TODO: create class (?) for getting escape codes, which would be passed in constructor
 
 namespace yb {
 
