@@ -16,31 +16,24 @@ struct EscapeCodeGenerator {
 
 struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
+    const EscapeCode EscapeCodeStart = "\033[";
+
     EscapeCode cursorForward(unsigned int n) const override {
         if (!n) return EscapeCode{};
-        EscapeCode a{"\033["};
-        a += std::to_string(n);
-        a += 'C';
-        return a;
+        return EscapeCodeStart + std::to_string(n) + 'C';
     }
 
     EscapeCode cursorBackward(unsigned int n) const override {
         if (!n) return EscapeCode{};
-        EscapeCode a{"\033["};
-        a += std::to_string(n);
-        a += 'D';
-        return a;
+        return EscapeCodeStart + std::to_string(n) + 'D';
     }
 
     EscapeCode clearTerminalLine() const override {
-        return EscapeCode{"\033[K"};
+        return EscapeCodeStart + 'K';
     }
 
     EscapeCode setColor(Color color) const override {
-        EscapeCode a{"\033["};
-        a += std::to_string(static_cast<int>(color));
-        a += 'm';
-        return a;
+        return EscapeCodeStart + std::to_string(static_cast<int>(color)) + 'm';
     }
 
 };
