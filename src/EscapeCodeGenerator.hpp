@@ -14,7 +14,7 @@ struct EscapeCodeGenerator {
 
 };
 
-struct ANSIEscapeCodeGenerator : public EscapeCodeGenerator {
+struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
     EscapeCode cursorForward(int n) const override {
         if (!n) return EscapeCode{};
