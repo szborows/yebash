@@ -42,7 +42,7 @@ TEST_CASE( "generates proper escape code for clearing the line", "ANSIEscapeCode
 
 TEST_CASE( "generates proper escape codes for colors", "ANSIEscapeCodeGenerator.colors") {
     ANSIEscapeCodeGenerator gen;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 98; i++) {
         testEscapeCodeWithNumber(gen.setColor(static_cast<Color>(i)), i, 'm');
     }
 }
