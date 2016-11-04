@@ -11,6 +11,7 @@ struct EscapeCodeGenerator {
     virtual EscapeCode cursorBackward(unsigned int) const { return EscapeCode{}; }
     virtual EscapeCode clearTerminalLine() const { return EscapeCode{}; }
     virtual EscapeCode setColor(Color) const { return EscapeCode{}; }
+    virtual ~EscapeCodeGenerator() {}
 
 };
 
@@ -33,6 +34,8 @@ struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
     EscapeCode setColor(Color color) const override {
         return EscapeCodeStart + std::to_string(static_cast<int>(color)) + 'm';
     }
+
+    ~ANSIEscapeCodeGenerator() override {}
 
 private:
     const EscapeCode EscapeCodeStart = "\033[";
