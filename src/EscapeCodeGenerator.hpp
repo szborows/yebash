@@ -7,16 +7,16 @@ struct EscapeCodeGenerator {
 
     using EscapeCode = std::string;
 
-    virtual EscapeCode cursorForward(int) { return EscapeCode{}; }
-    virtual EscapeCode cursorBackward(int) { return EscapeCode{}; }
-    virtual EscapeCode clearTerminalLine() { return EscapeCode{}; }
-    virtual EscapeCode setColor(Color) { return EscapeCode{}; }
+    virtual EscapeCode cursorForward(int) const { return EscapeCode{}; }
+    virtual EscapeCode cursorBackward(int) const { return EscapeCode{}; }
+    virtual EscapeCode clearTerminalLine() const { return EscapeCode{}; }
+    virtual EscapeCode setColor(Color) const { return EscapeCode{}; }
 
 };
 
 struct ANSIEscapeCodeGenerator : public EscapeCodeGenerator {
 
-    EscapeCode cursorForward(int n) override {
+    EscapeCode cursorForward(int n) const override {
         if (!n) return EscapeCode{};
         EscapeCode a{"\033["};
         a += std::to_string(n);
@@ -24,7 +24,7 @@ struct ANSIEscapeCodeGenerator : public EscapeCodeGenerator {
         return a;
     }
 
-    EscapeCode cursorBackward(int n) override {
+    EscapeCode cursorBackward(int n) const override {
         if (!n) return EscapeCode{};
         EscapeCode a{"\033["};
         a += std::to_string(n);
@@ -32,11 +32,11 @@ struct ANSIEscapeCodeGenerator : public EscapeCodeGenerator {
         return a;
     }
 
-    EscapeCode clearTerminalLine() override {
+    EscapeCode clearTerminalLine() const override {
         return EscapeCode{"\033[K"};
     }
 
-    EscapeCode setColor(Color color) override {
+    EscapeCode setColor(Color color) const override {
         EscapeCode a{"\033["};
         a += std::to_string(static_cast<int>(color));
         a += 'm';
