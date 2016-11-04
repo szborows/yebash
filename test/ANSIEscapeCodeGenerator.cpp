@@ -40,3 +40,10 @@ TEST_CASE( "generates proper escape code for clearing the line", "ANSIEscapeCode
     REQUIRE(result == "\033[K");
 }
 
+TEST_CASE( "generates proper escape codes for colors", "ANSIEscapeCodeGenerator.colors") {
+    ANSIEscapeCodeGenerator gen;
+    for (int i = 0; i < 100; i++) {
+        testEscapeCodeWithNumber(gen.setColor(static_cast<Color>(i)), i, 'm');
+    }
+}
+
