@@ -58,8 +58,6 @@ struct Printer {
 
 private:
 
-    void printInColor(const char *buffer, Color color);
-
     std::ostream &output_;
     EscapeCodeHandler &escapeCodeHandler_;
 
