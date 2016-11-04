@@ -25,8 +25,8 @@ History createHistory(initializer_list<string> const& commands) {
 
 void tearDown() {
     std::stringstream output, ss;
-    EscapeCodeHandler escapeCodeHandler;
-    Printer printer(output, escapeCodeHandler);
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
     History history;
     history.read(ss);
     HistorySuggestion suggestion(history);
@@ -41,8 +41,8 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
         HistorySuggestion suggestion(history);
 
         std::stringstream output;
-        EscapeCodeHandler escapeCodeHandler;
-        Printer printer(output, escapeCodeHandler);
+        EscapeCodeGenerator escapeCodeGenerator;
+        Printer printer(output, escapeCodeGenerator);
 
         auto result = yebash(suggestion, printer, c);
 
@@ -63,8 +63,8 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    EscapeCodeHandler escapeCodeHandler;
-    Printer printer(output, escapeCodeHandler);
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
 
     auto character = 'a';
     auto result = yebash(suggestion, printer, character);
@@ -89,8 +89,8 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    EscapeCodeHandler escapeCodeHandler;
-    Printer printer(output, escapeCodeHandler);
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
 
     yebash(suggestion, printer, 'a');
 
@@ -134,8 +134,8 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    EscapeCodeHandler escapeCodeHandler;
-    Printer printer(output, escapeCodeHandler);
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
 
     constexpr char backspace = 0x7f;
 
@@ -161,8 +161,8 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    EscapeCodeHandler escapeCodeHandler;
-    Printer printer(output, escapeCodeHandler);
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
 
     constexpr char backspace = 0x7f;
 

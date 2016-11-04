@@ -3,7 +3,7 @@
 #include "Defs.hpp"
 #include <string>
 
-struct EscapeCodeHandler {
+struct EscapeCodeGenerator {
 
     using EscapeCode = std::string;
 
@@ -14,7 +14,7 @@ struct EscapeCodeHandler {
 
 };
 
-struct ANSIEscapeCodeHandler : public EscapeCodeHandler {
+struct ANSIEscapeCodeGenerator : public EscapeCodeGenerator {
 
     EscapeCode cursorForward(int n) override {
         if (!n) return EscapeCode{};

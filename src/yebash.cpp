@@ -48,7 +48,7 @@ CharOpt arrowHandler2(HistorySuggestion &, Printer &, Char);
 CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
-thread_local std::unique_ptr<EscapeCodeHandler> escapeCodeHandler = nullptr;
+thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
 
 thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
@@ -186,7 +186,7 @@ static void yebashInit()  {
     gHistory.read(historyFile);
     historyFile.close();
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
-    escapeCodeHandler = std::make_unique<ANSIEscapeCodeHandler>();
-    printer = std::make_unique<Printer>(std::cout, *escapeCodeHandler);
+    escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
+    printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
 }
 
