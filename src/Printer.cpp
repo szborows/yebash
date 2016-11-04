@@ -2,36 +2,16 @@
 #include <cstring>
 #include <iostream>
 
-// TODO: change "if (&output_ == &std::cout)" to something more convenient or move it out
-
 namespace yb {
 
 void Printer::clearTerminalLine() {
-    if (&output_ == &std::cout) {
-       output_ << "\033[K" << std::flush;
-    }
-}
-
-void Printer::printInColor(const char *buffer, Color color) {
-    if (&output_ == &std::cout)
-        output_ << "\e[" << static_cast<int>(color) << 'm';
-    output_ << buffer;
-    if (&output_ == &std::cout)
-        output_ << "\e[0m";
+    output_ << escapeCodeGenerator_.clearTerminalLine();
 }
 
 void Printer::print(const char *text, Color color, int offset) {
-    if (&output_ == &std::cout) {
-        clearTerminalLine();
-        if (offset)
-           cursor_forward(offset);
-    }
-    printInColor(text, color);
-    if (&output_ == &std::cout) {
-        cursor_backward(std::strlen(text) + offset);
-    }
-    output_ << std::flush;
-
+    output_ << escapeCodeGenerator_.clearTerminalLine()  << escapeCodeGenerator_.cursorForward(offset)
+            << escapeCodeGenerator_.setColor(color) << text << escapeCodeGenerator_.setColor(Color::reset)
+            << escapeCodeGenerator_.cursorBackward(std::strlen(text) + offset) << std::flush;
 }
 
 } // namespace yb

@@ -1,29 +1,21 @@
 #pragma once
 
 #include "Defs.hpp"
+#include "EscapeCodeGenerator.hpp"
 #include <iostream>
 
 namespace yb {
 
 struct Printer {
 
-    explicit Printer(std::ostream &output) : output_(output) {}
+    explicit Printer(std::ostream &output, EscapeCodeGenerator &escapeCodeGenerator) : output_(output), escapeCodeGenerator_(escapeCodeGenerator) {}
     void print(const char *text, Color color, int offset);
     void clearTerminalLine();
 
 private:
 
-    void printInColor(const char *buffer, Color color);
-
-    inline void cursor_forward(int x) {
-        output_ << "\033[" << x << 'C';
-    }
-
-    inline void cursor_backward(int x) {
-        output_ << "\033[" << x << 'D';
-    }
-
     std::ostream &output_;
+    EscapeCodeGenerator &escapeCodeGenerator_;
 
 };
 
