@@ -7,8 +7,8 @@ struct EscapeCodeGenerator {
 
     using EscapeCode = std::string;
 
-    virtual EscapeCode cursorForward(int) const { return EscapeCode{}; }
-    virtual EscapeCode cursorBackward(int) const { return EscapeCode{}; }
+    virtual EscapeCode cursorForward(unsigned int) const { return EscapeCode{}; }
+    virtual EscapeCode cursorBackward(unsigned int) const { return EscapeCode{}; }
     virtual EscapeCode clearTerminalLine() const { return EscapeCode{}; }
     virtual EscapeCode setColor(Color) const { return EscapeCode{}; }
 
@@ -16,7 +16,7 @@ struct EscapeCodeGenerator {
 
 struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
-    EscapeCode cursorForward(int n) const override {
+    EscapeCode cursorForward(unsigned int n) const override {
         if (!n) return EscapeCode{};
         EscapeCode a{"\033["};
         a += std::to_string(n);
@@ -24,7 +24,7 @@ struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
         return a;
     }
 
-    EscapeCode cursorBackward(int n) const override {
+    EscapeCode cursorBackward(unsigned int n) const override {
         if (!n) return EscapeCode{};
         EscapeCode a{"\033["};
         a += std::to_string(n);
