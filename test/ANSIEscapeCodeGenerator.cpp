@@ -1,6 +1,8 @@
 #include "../src/EscapeCodeGenerator.hpp"
 #include "catch.hpp"
 
+using namespace yb;
+
 void testEscapeCodeWithNumber(const std::string &result, int n, char c) {
     std::string compare{"\033["};
     compare += std::to_string(n);

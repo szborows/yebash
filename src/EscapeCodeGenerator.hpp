@@ -3,6 +3,8 @@
 #include "Defs.hpp"
 #include <string>
 
+namespace yb {
+
 struct EscapeCodeGenerator {
 
     using EscapeCode = std::string;
@@ -41,4 +43,6 @@ private:
     const EscapeCode EscapeCodeStart = "\033[";
 
 };
+
+} // namespace yb
 
