@@ -1,6 +1,13 @@
 #include "../src/EscapeCodeGenerator.hpp"
 #include "catch.hpp"
 
+void testEscapeCodeWithNumber(const std::string &result, int n, char c) {
+    std::string compare{"\033["};
+    compare += std::to_string(n);
+    compare += c;
+    REQUIRE(result == compare); 
+}
+
 TEST_CASE( "does not generate escape code for moving forward by 0", "[ANSIEscapeCodeGenerator.nullMoveForward]") {
     ANSIEscapeCodeGenerator gen;
     auto result = gen.cursorForward(0);
@@ -9,15 +16,8 @@ TEST_CASE( "does not generate escape code for moving forward by 0", "[ANSIEscape
 
 TEST_CASE( "can generate proper escape codes for moving forward", "[ANSIEscapeCodeGenerator.movingForward]") {
     ANSIEscapeCodeGenerator gen;
-    auto test = [&] (int n) {
-        std::string compare{"\033["};
-        compare += std::to_string(n);
-        compare += 'C';
-        auto result = gen.cursorForward(n);
-        REQUIRE(result == compare); 
-    };
     for (int i = 1; i < 100; i++) {
-        test(i);
+        testEscapeCodeWithNumber(gen.cursorForward(i), i, 'C');
     }
 }
 
@@ -29,15 +29,8 @@ TEST_CASE( "does not generate escape code for moving backward by 0", "[ANSIEscap
 
 TEST_CASE( "can generate proper escape codes for moving backward", "[ANSIEscapeCodeGenerator.movingBackward]") {
     ANSIEscapeCodeGenerator gen;
-    auto test = [&] (int n) {
-        std::string compare{"\033["};
-        compare += std::to_string(n);
-        compare += 'D';
-        auto result = gen.cursorBackward(n);
-        REQUIRE(result == compare); 
-    };
     for (int i = 1; i < 100; i++) {
-        test(i);
+        testEscapeCodeWithNumber(gen.cursorBackward(i), i, 'D');
     }
 }
 
