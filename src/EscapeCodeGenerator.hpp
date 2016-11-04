@@ -16,8 +16,6 @@ struct EscapeCodeGenerator {
 
 struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
-    const EscapeCode EscapeCodeStart = "\033[";
-
     EscapeCode cursorForward(unsigned int n) const override {
         if (!n) return EscapeCode{};
         return EscapeCodeStart + std::to_string(n) + 'C';
@@ -35,6 +33,9 @@ struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
     EscapeCode setColor(Color color) const override {
         return EscapeCodeStart + std::to_string(static_cast<int>(color)) + 'm';
     }
+
+private:
+    const EscapeCode EscapeCodeStart = "\033[";
 
 };
 
