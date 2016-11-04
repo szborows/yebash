@@ -25,7 +25,8 @@ History createHistory(initializer_list<string> const& commands) {
 
 void tearDown() {
     std::stringstream output, ss;
-    Printer printer(output);
+    EscapeCodeHandler escapeCodeHandler;
+    Printer printer(output, escapeCodeHandler);
     History history;
     history.read(ss);
     HistorySuggestion suggestion(history);
@@ -40,7 +41,8 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
         HistorySuggestion suggestion(history);
 
         std::stringstream output;
-        Printer printer(output);
+        EscapeCodeHandler escapeCodeHandler;
+        Printer printer(output, escapeCodeHandler);
 
         auto result = yebash(suggestion, printer, c);
 
@@ -61,7 +63,8 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    Printer printer(output);
+    EscapeCodeHandler escapeCodeHandler;
+    Printer printer(output, escapeCodeHandler);
 
     auto character = 'a';
     auto result = yebash(suggestion, printer, character);
@@ -86,7 +89,8 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    Printer printer(output);
+    EscapeCodeHandler escapeCodeHandler;
+    Printer printer(output, escapeCodeHandler);
 
     yebash(suggestion, printer, 'a');
 
@@ -130,7 +134,8 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    Printer printer(output);
+    EscapeCodeHandler escapeCodeHandler;
+    Printer printer(output, escapeCodeHandler);
 
     constexpr char backspace = 0x7f;
 
@@ -156,7 +161,8 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
-    Printer printer(output);
+    EscapeCodeHandler escapeCodeHandler;
+    Printer printer(output, escapeCodeHandler);
 
     constexpr char backspace = 0x7f;
 

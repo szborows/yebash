@@ -8,31 +8,17 @@
 namespace yb {
 
 void Printer::clearTerminalLine() {
-    if (&output_ == &std::cout) {
-       output_ << "\033[K" << std::flush;
-    }
+    output_ << escapeCodeHandler_.clearTerminalLine();
 }
 
 void Printer::printInColor(const char *buffer, Color color) {
-    if (&output_ == &std::cout)
-        output_ << "\e[" << static_cast<int>(color) << 'm';
-    output_ << buffer;
-    if (&output_ == &std::cout)
-        output_ << "\e[0m";
+    output_ << escapeCodeHandler_.setColor(color) << buffer << escapeCodeHandler_.setColor(Color::reset);
 }
 
 void Printer::print(const char *text, Color color, int offset) {
-    if (&output_ == &std::cout) {
-        clearTerminalLine();
-        if (offset)
-           cursor_forward(offset);
-    }
+    output_ << escapeCodeHandler_.clearTerminalLine()  << escapeCodeHandler_.cursorForward(offset);
     printInColor(text, color);
-    if (&output_ == &std::cout) {
-        cursor_backward(std::strlen(text) + offset);
-    }
-    output_ << std::flush;
-
+    output_ << escapeCodeHandler_.cursorBackward(std::strlen(text) + offset) << std::flush;
 }
 
 } // namespace yb

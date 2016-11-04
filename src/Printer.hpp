@@ -9,35 +9,41 @@ struct EscapeCodeHandler {
 
     using EscapeCode = std::string;
 
-    virtual EscapeCode cursorForward(int n);
-    virtual EscapeCode cursorBackward(int n);
-    virtual EscapeCode clearTerminalLine();
-    virtual EscapeCode setColor(Color color);
+    virtual EscapeCode cursorForward(int) { return EscapeCode{}; }
+    virtual EscapeCode cursorBackward(int) { return EscapeCode{}; };
+    virtual EscapeCode clearTerminalLine() { return EscapeCode{}; };
+    virtual EscapeCode setColor(Color) { return EscapeCode{}; };
+
 };
 
-struct ANSIEscapeCodeHandler : EscapeCodeHandler {
+struct ANSIEscapeCodeHandler : public EscapeCodeHandler {
 
     EscapeCode cursorForward(int n) override {
-        std::string a{"\e["};
-        a += n;
+        if (!n) return EscapeCode{};
+        EscapeCode a;
+        a += "\033[";
+        a += std::to_string(n);
         a += 'C';
         return a;
     }
 
     EscapeCode cursorBackward(int n) override {
-        std::string a{"\e["};
-        a += n;
+        if (!n) return EscapeCode{};
+        EscapeCode a;
+        a = "\033[";
+        a += std::to_string(n);
         a += 'D';
         return a;
     }
 
     EscapeCode clearTerminalLine() override {
-        return EscapeCode{"\e[K"};
+        return EscapeCode{"\033[K"};
     }
 
     EscapeCode setColor(Color color) override {
-        EscapeCode a{"\e["};
-        a += static_cast<int>(color);
+        EscapeCode a;
+        a = "\033[";
+        a += std::to_string(static_cast<int>(color));
         a += 'm';
         return a;
     }
@@ -46,7 +52,7 @@ struct ANSIEscapeCodeHandler : EscapeCodeHandler {
 
 struct Printer {
 
-    explicit Printer(std::ostream &output) : output_(output) {}
+    explicit Printer(std::ostream &output, EscapeCodeHandler &escapeCodeHandler) : output_(output), escapeCodeHandler_(escapeCodeHandler) {}
     void print(const char *text, Color color, int offset);
     void clearTerminalLine();
 
@@ -54,15 +60,8 @@ private:
 
     void printInColor(const char *buffer, Color color);
 
-    inline void cursor_forward(int x) {
-        output_ << "\033[" << x << 'C';
-    }
-
-    inline void cursor_backward(int x) {
-        output_ << "\033[" << x << 'D';
-    }
-
     std::ostream &output_;
+    EscapeCodeHandler &escapeCodeHandler_;
 
 };
 
