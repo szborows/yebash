@@ -18,16 +18,31 @@ class ArrowHandler {
     using Handler = void(HistorySuggestion &, Printer &);
     std::array<std::function<Handler>, 4> handlers_;
     std::array<std::string, 4> escapeCodes = {"\e[1D", "\e[1A", "\e[1C", "\e[1B"};
-    std::array<Char, 4> currentState;
+    std::string currentState;
+    std::string::iterator currentStateIterator;
 
 public:
 
-    explicit ArrowHandler(Handler left, Handler up, Handler right, Handler down) {
+    ArrowHandler(Handler left, Handler up, Handler right, Handler down) {
         handlers_[left_] = left;
         handlers_[up_] = up;
         handlers_[right_] = right;
         handlers_[down_] = down;
+        currentState.resize(5);
+        currentStateIterator = currentState.begin();
     } 
+
+    CharOpt handle(unsigned char c) {
+        *currentStateIterator++ = c;
+        for (const auto &it : escapeCodes) {
+            if (it.compare(0, currentState.length(), currentState)) {
+                return {};
+            }
+        }
+        currentState.clear();
+        currentStateIterator = currentState.begin();
+        return c;
+    }
 
 };
 
