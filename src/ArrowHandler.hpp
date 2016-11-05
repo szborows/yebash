@@ -9,10 +9,10 @@
 namespace yb {
 
 enum class Arrow {
-    left = 'D',
-    up = 'A',
-    right = 'C',
-    down = 'B'
+    left,
+    up,
+    right,
+    down
 };
 
 class ArrowHandler {
@@ -23,6 +23,7 @@ class ArrowHandler {
     const int down_ = 3;
 
     using Handler = void(HistorySuggestion &, Printer &);
+    const EscapeCodeGenerator &escapeCodeGenerator_;
     std::array<std::function<Handler>, 4> handlers_;
     std::array<std::string, 4> escapeCodes = {{"\e[1D", "\e[1A", "\e[1C", "\e[1B"}};
     std::string currentState;
@@ -30,11 +31,7 @@ class ArrowHandler {
 
 public:
 
-    ArrowHandler(Handler left, Handler up, Handler right, Handler down) {
-        handlers_[left_] = left;
-        handlers_[up_] = up;
-        handlers_[right_] = right;
-        handlers_[down_] = down;
+    ArrowHandler(const EscapeCodeGenerator &escapeCodeGenerator) : escapeCodeGenerator_(escapeCodeGenerator) {
         currentState.resize(5);
         currentStateIterator = currentState.begin();
     } 
