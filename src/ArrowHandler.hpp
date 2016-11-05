@@ -8,6 +8,13 @@
 
 namespace yb {
 
+enum class Arrow {
+    left = 'D',
+    up = 'A',
+    right = 'C',
+    down = 'B'
+};
+
 class ArrowHandler {
 
     const int left_ = 0;
