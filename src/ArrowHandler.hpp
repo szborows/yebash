@@ -17,7 +17,7 @@ class ArrowHandler {
 
     using Handler = void(HistorySuggestion &, Printer &);
     std::array<std::function<Handler>, 4> handlers_;
-    std::array<std::string, 4> escapeCodes = {"\e[1D", "\e[1A", "\e[1C", "\e[1B"};
+    std::array<std::string, 4> escapeCodes = {{"\e[1D", "\e[1A", "\e[1C", "\e[1B"}};
     std::string currentState;
     std::string::iterator currentStateIterator;
 
