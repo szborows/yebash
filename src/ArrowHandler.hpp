@@ -5,50 +5,53 @@
 #include "Printer.hpp"
 #include <array>
 #include <functional>
+#include <experimental/optional>
+#include <unordered_map>
 
 namespace yb {
 
 enum class Arrow {
-    left = 'D',
-    up = 'A',
-    right = 'C',
-    down = 'B'
+    no,
+    left,
+    up,
+    right,
+    down
 };
 
 class ArrowHandler {
 
-    const int left_ = 0;
-    const int up_ = 1;
-    const int right_ = 2;
-    const int down_ = 3;
-
     using Handler = void(HistorySuggestion &, Printer &);
-    std::array<std::function<Handler>, 4> handlers_;
-    std::array<std::string, 4> escapeCodes = {{"\e[1D", "\e[1A", "\e[1C", "\e[1B"}};
+    const EscapeCodeGenerator &escapeCodeGenerator_;
+    std::unordered_map<Arrow, std::string> escapeCodes_;
     std::string currentState;
-    std::string::iterator currentStateIterator;
 
 public:
 
-    ArrowHandler(Handler left, Handler up, Handler right, Handler down) {
-        handlers_[left_] = left;
-        handlers_[up_] = up;
-        handlers_[right_] = right;
-        handlers_[down_] = down;
-        currentState.resize(5);
-        currentStateIterator = currentState.begin();
+    using ArrowOpt = std::experimental::optional<Arrow>;
+
+    explicit ArrowHandler(const EscapeCodeGenerator &escapeCodeGenerator) : escapeCodeGenerator_(escapeCodeGenerator) {
+        escapeCodes_[Arrow::left] = escapeCodeGenerator_.cursorBackward(1);
+        escapeCodes_[Arrow::up] = escapeCodeGenerator_.cursorUp(1);
+        escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
+        escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
+        currentState.reserve(5);
     } 
 
-    CharOpt handle(unsigned char c) {
-        *currentStateIterator++ = c;
-        for (const auto &it : escapeCodes) {
-            if (it.compare(0, currentState.length(), currentState)) {
-                return {};
+    ArrowOpt handle(unsigned char c) {
+        currentState += c;
+        for (auto it = escapeCodes_.begin(); it != escapeCodes_.end(); ++it) {
+            auto arrow = std::get<0>(*it);
+            auto ec = std::get<1>(*it);
+            if (ec.compare(0, currentState.length(), currentState) == 0) {
+                if (ec.length() == currentState.length()) {
+                    currentState.clear();
+                    return arrow;
+                }
+                return Arrow::no;
             }
         }
         currentState.clear();
-        currentStateIterator = currentState.begin();
-        return c;
+        return {};
     }
 
 };

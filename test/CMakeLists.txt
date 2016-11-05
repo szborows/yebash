@@ -2,6 +2,7 @@ include_directories(../src)
 set(SOURCES
     main.cpp
     ANSIEscapeCodeGenerator.cpp
+    ArrowHandler.cpp
     basic.cpp)
 
 add_executable(tests ${SOURCES})
