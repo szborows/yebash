@@ -17,6 +17,7 @@ struct EscapeCodeGenerator {
 
 };
 
+// https://en.wikipedia.org/wiki/ANSI_escape_code
 struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
     EscapeCode cursorForward(unsigned int n) const override {
