@@ -34,7 +34,7 @@ public:
         escapeCodes_[Arrow::up] = escapeCodeGenerator_.cursorUp(1);
         escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
         escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
-        currentState.resize(5);
+        currentState.reserve(5);
     } 
 
     ArrowOpt handle(unsigned char c) {
