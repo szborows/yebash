@@ -5,8 +5,7 @@ using namespace yb;
 
 void testEscapeCodeWithNumber(const std::string &result, int n, char c) {
     std::string compare{"\033["};
-    compare += std::to_string(n);
-    compare += c;
+    compare += std::to_string(n) + c;
     REQUIRE(result == compare); 
 }
 
@@ -18,7 +17,7 @@ TEST_CASE( "does not generate escape code for moving up by 0", "[ANSIEscapeCodeG
 
 TEST_CASE( "can generate proper escape codes for moving up", "[ANSIEscapeCodeGenerator.movingUp]" ) {
     ANSIEscapeCodeGenerator gen;
-    for (int i = 1; i < 100; i++) {
+    for (int i = 2; i < 100; i++) {
         testEscapeCodeWithNumber(gen.cursorUp(i), i, 'A');
     }
 }
@@ -31,7 +30,7 @@ TEST_CASE( "does not generate escape code for moving down by 0", "[ANSIEscapeCod
 
 TEST_CASE( "can generate proper escape codes for moving down", "[ANSIEscapeCodeGenerator.movingDown]" ) {
     ANSIEscapeCodeGenerator gen;
-    for (int i = 1; i < 100; i++) {
+    for (int i = 2; i < 100; i++) {
         testEscapeCodeWithNumber(gen.cursorDown(i), i, 'B');
     }
 }
@@ -44,7 +43,7 @@ TEST_CASE( "does not generate escape code for moving forward by 0", "[ANSIEscape
 
 TEST_CASE( "can generate proper escape codes for moving forward", "[ANSIEscapeCodeGenerator.movingForward]" ) {
     ANSIEscapeCodeGenerator gen;
-    for (int i = 1; i < 100; i++) {
+    for (int i = 2; i < 100; i++) {
         testEscapeCodeWithNumber(gen.cursorForward(i), i, 'C');
     }
 }
@@ -57,7 +56,7 @@ TEST_CASE( "does not generate escape code for moving backward by 0", "[ANSIEscap
 
 TEST_CASE( "can generate proper escape codes for moving backward", "[ANSIEscapeCodeGenerator.movingBackward]" ) {
     ANSIEscapeCodeGenerator gen;
-    for (int i = 1; i < 100; i++) {
+    for (int i = 2; i < 100; i++) {
         testEscapeCodeWithNumber(gen.cursorBackward(i), i, 'D');
     }
 }
