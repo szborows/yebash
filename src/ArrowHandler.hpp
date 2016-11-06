@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Defs.hpp"
-#include "HistorySuggestion.hpp"
 #include "Printer.hpp"
-#include <array>
 #include <functional>
 #include <experimental/optional>
 #include <unordered_map>
@@ -18,7 +16,7 @@ enum class Arrow {
     down
 };
 
-class ArrowHandler {
+class ArrowHandler final {
 
     const EscapeCodeGenerator &escapeCodeGenerator_;
     std::unordered_map<Arrow, std::string> escapeCodes_;

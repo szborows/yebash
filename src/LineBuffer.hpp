@@ -6,7 +6,7 @@
 
 namespace yb {
 
-class LineBuffer {
+class LineBuffer final {
 
     using Container = std::string;
     using Iterator = Container::iterator;
