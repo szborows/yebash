@@ -5,7 +5,7 @@
 namespace yb {
 
 void Printer::clearTerminalLine() {
-    output_ << escapeCodeGenerator_.clearTerminalLine();
+    output_ << escapeCodeGenerator_.clearTerminalLine() << std::flush;
 }
 
 void Printer::print(const char *text, Color color, int offset) {
