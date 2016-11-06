@@ -6,6 +6,7 @@
 #include <array>
 #include <functional>
 #include <experimental/optional>
+#include <unordered_map>
 
 namespace yb {
 
@@ -18,14 +19,9 @@ enum class Arrow {
 
 class ArrowHandler {
 
-    const int left_ = 0;
-    const int up_ = 1;
-    const int right_ = 2;
-    const int down_ = 3;
-
     using Handler = void(HistorySuggestion &, Printer &);
     const EscapeCodeGenerator &escapeCodeGenerator_;
-    std::array<std::string, 4> escapeCodes = {{"\e[1D", "\e[1A", "\e[1C", "\e[1B"}};
+    std::unordered_map<Arrow, std::string> escapeCodes_;
     std::string currentState;
     std::string::iterator currentStateIterator;
 
@@ -33,18 +29,17 @@ public:
 
     using ArrowOpt = std::experimental::optional<Arrow>;
 
-    ArrowHandler(const EscapeCodeGenerator &escapeCodeGenerator) : escapeCodeGenerator_(escapeCodeGenerator) {
+    explicit ArrowHandler(const EscapeCodeGenerator &escapeCodeGenerator) : escapeCodeGenerator_(escapeCodeGenerator) {
+        escapeCodes_[Arrow::left] = escapeCodeGenerator_.cursorBackward(1);
+        escapeCodes_[Arrow::up] = escapeCodeGenerator_.cursorUp(1);
+        escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
+        escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
         currentState.resize(5);
         currentStateIterator = currentState.begin();
     } 
 
     ArrowOpt handle(unsigned char c) {
         *currentStateIterator++ = c;
-        for (const auto &it : escapeCodes) {
-            if (it.compare(0, currentState.length(), currentState)) {
-                return {}; // TODO: return proper Arrow value
-            }
-        }
         currentState.clear();
         currentStateIterator = currentState.begin();
         return {};
