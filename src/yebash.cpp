@@ -13,7 +13,6 @@
 #include "yebash.hpp"
 #include "HistorySuggestion.hpp"
 #include "Defs.hpp"
-#include "KeyHandlers.hpp"
 #include "Printer.hpp"
 #include "ArrowHandler.hpp"
 
@@ -43,22 +42,17 @@ thread_local ColorOpt suggestionColor = {};
 CharOpt newlineHandler(HistorySuggestion &, Printer &, Char);
 CharOpt tabHandler(HistorySuggestion &, Printer &, Char);
 CharOpt backspaceHandler(HistorySuggestion &, Printer &, Char);
-CharOpt regularCHarHandler(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler1(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler2(HistorySuggestion &, Printer &, Char);
-CharOpt arrowHandler3(HistorySuggestion &, Printer &, Char);
+CharOpt regularCharHandler(HistorySuggestion &, Printer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
+thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
 
 thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, Char)>> handlers = {
     {0x06, tabHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
-    {0x1b, yb::arrowHandler1},
-    {0x5b, arrowHandler2},
-    {0x43, arrowHandler3},
     {0x7f, backspaceHandler}
 };
 
@@ -98,33 +92,6 @@ CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, Char c)
 CharOpt tabHandler(HistorySuggestion &history, Printer &printer, Char) {
     printSuggestion(history, printer, 0);
     return Char{0}; // TODO: this does not seem to work.
-}
-
-CharOpt arrowHandler2(HistorySuggestion &history, Printer &printer, Char c) {
-    if (arrowIndicator == 1) {
-        arrowIndicator = 2;
-        return {};
-    }
-    else {
-        return regularCharHandler(history, printer, c);
-    }
-}
-
-CharOpt arrowHandler3(HistorySuggestion &history, Printer &printer, Char c) {
-    CharOpt return_value = {};
-    if (arrowIndicator == 2) {
-        arrowIndicator = 0;
-        try {
-            printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
-            printBufferPos = printBuffer.begin();
-        } catch (...) {
-            // FIXME:
-        }
-    }
-    else {
-        return_value = regularCharHandler(history, printer, c);
-    }
-    return return_value;
 }
 
 namespace yb {
@@ -189,5 +156,6 @@ static void yebashInit()  {
     historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
+    arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
 }
 
