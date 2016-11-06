@@ -8,6 +8,8 @@ TEST_CASE( "can insert a char to the empty LineBuffer", "LineBuffer.insert" ) {
         LineBuffer buf;
         buf.insert(c);
         std::string result{buf.get()};
+        REQUIRE(buf.getChar() == 0);
+        REQUIRE(buf.getPosition() == 1);
         REQUIRE(result == std::string{c});
     };
     std::string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
@@ -18,10 +20,13 @@ TEST_CASE( "can insert multiple chars", "LineBuffer.multiple" ) {
     LineBuffer buf;
     buf.insert('a');
     REQUIRE(std::string{buf.get()} == "a");
+    REQUIRE(buf.getPosition() == 1);
     buf.insert('b');
     REQUIRE(std::string{buf.get()} == "ab");
+    REQUIRE(buf.getPosition() == 2);
     buf.insert('c');
     REQUIRE(std::string{buf.get()} == "abc");
+    REQUIRE(buf.getPosition() == 3);
 }
 
 TEST_CASE( "remove can't break it", "LineBuffer.emptyRemove" ) {
@@ -29,6 +34,7 @@ TEST_CASE( "remove can't break it", "LineBuffer.emptyRemove" ) {
     for (int i = 0; i < 100; i++) {
         buf.remove();
         REQUIRE(std::string{buf.get()} == "");
+        REQUIRE(buf.getPosition() == 0);
     }
 }
 
@@ -53,6 +59,7 @@ TEST_CASE( "can move in buffer and insert/delete characters", "LineBuffer.move" 
     buf.insert('c');
     buf.insert('d');
     buf.move(-1);
+    REQUIRE(buf.getChar() == 'd');
     buf.remove();
     REQUIRE(std::string{buf.get()} == "abd");
     buf.insert('z');

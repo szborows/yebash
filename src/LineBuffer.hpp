@@ -43,6 +43,14 @@ public:
         position_ += n;
     }
 
+    size_t getPosition() const {
+        return position_ - buffer_.begin();
+    }
+
+    char getChar() const {
+        return *position_;
+    }
+
 };
 
 } // namespace yb
