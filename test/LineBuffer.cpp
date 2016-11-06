@@ -14,3 +14,35 @@ TEST_CASE( "can insert a char to the empty LineBuffer", "LineBuffer.insert" ) {
     for_each(domain.begin(), domain.end(), testCharacter);
 }
 
+TEST_CASE( "can insert multiple chars", "LineBuffer.multiple" ) {
+    LineBuffer buf;
+    buf.insert('a');
+    REQUIRE(std::string{buf.get()} == "a");
+    buf.insert('b');
+    REQUIRE(std::string{buf.get()} == "ab");
+    buf.insert('c');
+    REQUIRE(std::string{buf.get()} == "abc");
+}
+
+TEST_CASE( "remove can't break it", "LineBuffer.emptyRemove" ) {
+    LineBuffer buf;
+    for (int i = 0; i < 100; i++) {
+        buf.remove();
+        REQUIRE(std::string{buf.get()} == "");
+    }
+}
+
+TEST_CASE( "can delete last character", "LineBuffer.deleteLast" ) {
+    LineBuffer buf;
+    buf.insert('a');
+    buf.insert('b');
+    buf.insert('c');
+    buf.insert('d');
+    buf.remove();
+    REQUIRE(std::string{buf.get()} == "abc");
+    buf.remove();
+    REQUIRE(std::string{buf.get()} == "ab");
+    buf.remove();
+    REQUIRE(std::string{buf.get()} == "a");
+}
+

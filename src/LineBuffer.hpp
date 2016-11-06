@@ -34,7 +34,9 @@ public:
     }
 
     void remove() {
+        if (position_ == buffer_.begin()) return;
         buffer_.erase(position_ - 1, position_);
+        position_--;
     }
 
 };
