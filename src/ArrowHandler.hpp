@@ -11,6 +11,7 @@
 namespace yb {
 
 enum class Arrow {
+    no,
     left,
     up,
     right,
@@ -40,6 +41,16 @@ public:
 
     ArrowOpt handle(unsigned char c) {
         *currentStateIterator++ = c;
+        for (auto it = escapeCodes_.begin(); it != escapeCodes_.end(); ++it) {
+            auto arrow = std::get<0>(*it);
+            auto ec = std::get<1>(*it);
+            if (!ec.compare(0, currentState.length(), currentState)) {
+                if (ec.length() == currentState.length()) {
+                    return arrow;
+                }
+                return Arrow::no;
+            }
+        }
         currentState.clear();
         currentStateIterator = currentState.begin();
         return {};
