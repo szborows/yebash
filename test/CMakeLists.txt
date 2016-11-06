@@ -3,6 +3,7 @@ set(SOURCES
     main.cpp
     ANSIEscapeCodeGenerator.cpp
     ArrowHandler.cpp
+    LineBuffer.cpp
     basic.cpp)
 
 add_executable(tests ${SOURCES})

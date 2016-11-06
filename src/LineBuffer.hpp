@@ -1,0 +1,43 @@
+#pragma once
+
+#include "Defs.hpp"
+
+#include <string>
+
+namespace yb {
+
+class LineBuffer {
+
+    using Container = std::string;
+    using Iterator = Container::iterator;
+    Container buffer_;
+    Iterator position_;
+
+public:
+
+    LineBuffer() {
+        buffer_.reserve(1024);
+        position_ = buffer_.begin();
+    }
+
+    void clear() {
+        buffer_.clear();
+        position_ = buffer_.begin();
+    }
+
+    const char *get() {
+        return buffer_.c_str();
+    }
+
+    void insert(unsigned char c) {
+        buffer_.insert(position_++, c);
+    }
+
+    void remove() {
+        buffer_.erase(position_ - 1, position_);
+    }
+
+};
+
+} // namespace yb
+
