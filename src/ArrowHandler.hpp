@@ -44,6 +44,7 @@ public:
             auto ec = std::get<1>(*it);
             if (ec.compare(0, currentState.length(), currentState) == 0) {
                 if (ec.length() == currentState.length()) {
+                    currentState.clear();
                     return arrow;
                 }
                 return Arrow::no;
