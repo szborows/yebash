@@ -14,9 +14,6 @@ void testArrow(ArrowHandler &handler, char c, ArrowHandler::ArrowOpt a) {
     result = handler.handle('[');
     REQUIRE(result.operator bool() == true);
     REQUIRE(result.value() == Arrow::no);
-    result = handler.handle('1');
-    REQUIRE(result.operator bool() == true);
-    REQUIRE(result.value() == Arrow::no);
     result = handler.handle(c);
     REQUIRE(result == a);
 }

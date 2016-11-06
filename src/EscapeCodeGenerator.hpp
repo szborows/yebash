@@ -24,22 +24,22 @@ struct ANSIEscapeCodeGenerator final : EscapeCodeGenerator {
 
     EscapeCode cursorUp(unsigned int n) const override {
         if (!n) return "";
-        return EscapeCodeStart + std::to_string(n) + 'A';
+        return EscapeCodeStart + (n == 1 ? "" : std::to_string(n)) + 'A';
     }
 
     EscapeCode cursorDown(unsigned int n) const override {
         if (!n) return "";
-        return EscapeCodeStart + std::to_string(n) + 'B';
+        return EscapeCodeStart + (n == 1 ? "" : std::to_string(n)) + 'B';
     }
 
     EscapeCode cursorForward(unsigned int n) const override {
         if (!n) return EscapeCode{};
-        return EscapeCodeStart + std::to_string(n) + 'C';
+        return EscapeCodeStart + (n == 1 ? "" : std::to_string(n)) + 'C';
     }
 
     EscapeCode cursorBackward(unsigned int n) const override {
         if (!n) return EscapeCode{};
-        return EscapeCodeStart + std::to_string(n) + 'D';
+        return EscapeCodeStart + (n == 1 ? "" : std::to_string(n)) + 'D';
     }
 
     EscapeCode clearTerminalLine() const override {
