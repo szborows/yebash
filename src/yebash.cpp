@@ -100,6 +100,18 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, unsigned char
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
+    // TODO: arrowHandler should be a parameter
+    auto arrow = arrowHandler->handle(c);
+    if (arrow) {
+        switch (arrow.value()) {
+            case Arrow::right:
+                printBuffer = historySuggestion->get().substr(lineBufferPos - lineBuffer.begin());
+                printBufferPos = printBuffer.begin();
+                return c;
+            default:
+                return c;
+        }
+    }
     auto handler = handlers[c];
     CharOpt cReturned;
     if (handler) {

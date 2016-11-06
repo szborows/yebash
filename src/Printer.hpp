@@ -8,14 +8,14 @@ namespace yb {
 
 struct Printer {
 
-    explicit Printer(std::ostream &output, EscapeCodeGenerator &escapeCodeGenerator) : output_(output), escapeCodeGenerator_(escapeCodeGenerator) {}
+    explicit Printer(std::ostream &output, const EscapeCodeGenerator &escapeCodeGenerator) : output_(output), escapeCodeGenerator_(escapeCodeGenerator) {}
     void print(const char *text, Color color, int offset);
     void clearTerminalLine();
 
 private:
 
     std::ostream &output_;
-    EscapeCodeGenerator &escapeCodeGenerator_;
+    const EscapeCodeGenerator &escapeCodeGenerator_;
 
 };
 

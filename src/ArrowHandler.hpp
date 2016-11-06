@@ -20,10 +20,9 @@ enum class Arrow {
 
 class ArrowHandler {
 
-    using Handler = void(HistorySuggestion &, Printer &);
     const EscapeCodeGenerator &escapeCodeGenerator_;
     std::unordered_map<Arrow, std::string> escapeCodes_;
-    std::string currentState;
+    std::string currentState_;
 
 public:
 
@@ -34,23 +33,23 @@ public:
         escapeCodes_[Arrow::up] = escapeCodeGenerator_.cursorUp(1);
         escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
         escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
-        currentState.reserve(5);
+        currentState_.reserve(5);
     } 
 
-    ArrowOpt handle(unsigned char c) {
-        currentState += c;
+    inline ArrowOpt handle(unsigned char c) {
+        currentState_ += c;
         for (auto it = escapeCodes_.begin(); it != escapeCodes_.end(); ++it) {
             auto arrow = std::get<0>(*it);
             auto ec = std::get<1>(*it);
-            if (ec.compare(0, currentState.length(), currentState) == 0) {
-                if (ec.length() == currentState.length()) {
-                    currentState.clear();
+            if (ec.compare(0, currentState_.length(), currentState_) == 0) {
+                if (ec.length() == currentState_.length()) {
+                    currentState_.clear();
                     return arrow;
                 }
                 return Arrow::no;
             }
         }
-        currentState.clear();
+        currentState_.clear();
         return {};
     }
 
