@@ -24,7 +24,6 @@ class ArrowHandler {
     const EscapeCodeGenerator &escapeCodeGenerator_;
     std::unordered_map<Arrow, std::string> escapeCodes_;
     std::string currentState;
-    std::string::iterator currentStateIterator;
 
 public:
 
@@ -36,15 +35,14 @@ public:
         escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
         escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
         currentState.resize(5);
-        currentStateIterator = currentState.begin();
     } 
 
     ArrowOpt handle(unsigned char c) {
-        *currentStateIterator++ = c;
+        currentState += c;
         for (auto it = escapeCodes_.begin(); it != escapeCodes_.end(); ++it) {
             auto arrow = std::get<0>(*it);
             auto ec = std::get<1>(*it);
-            if (!ec.compare(0, currentState.length(), currentState)) {
+            if (ec.compare(0, currentState.length(), currentState) == 0) {
                 if (ec.length() == currentState.length()) {
                     return arrow;
                 }
@@ -52,7 +50,6 @@ public:
             }
         }
         currentState.clear();
-        currentStateIterator = currentState.begin();
         return {};
     }
 
