@@ -25,7 +25,7 @@ public:
         position_ = buffer_.begin();
     }
 
-    const char *get() {
+    const char *get() const {
         return buffer_.c_str();
     }
 
@@ -37,6 +37,10 @@ public:
         if (position_ == buffer_.begin()) return;
         buffer_.erase(position_ - 1, position_);
         position_--;
+    }
+
+    void move(int n) {
+        position_ += n;
     }
 
 };

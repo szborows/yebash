@@ -46,3 +46,21 @@ TEST_CASE( "can delete last character", "LineBuffer.deleteLast" ) {
     REQUIRE(std::string{buf.get()} == "a");
 }
 
+TEST_CASE( "can move in buffer and insert/delete characters", "LineBuffer.move" ) {
+    LineBuffer buf;
+    buf.insert('a');
+    buf.insert('b');
+    buf.insert('c');
+    buf.insert('d');
+    buf.move(-1);
+    buf.remove();
+    REQUIRE(std::string{buf.get()} == "abd");
+    buf.insert('z');
+    REQUIRE(std::string{buf.get()} == "abzd");
+    buf.insert('x');
+    REQUIRE(std::string{buf.get()} == "abzxd");
+    buf.move(1);
+    buf.insert('c');
+    REQUIRE(std::string{buf.get()} == "abzxdc");
+}
+
