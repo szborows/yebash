@@ -1,6 +1,7 @@
 include_directories(../src)
 set(SOURCES
     main.cpp
+    EscapeCodeGenerator.cpp
     ANSIEscapeCodeGenerator.cpp
     ArrowHandler.cpp
     LineBuffer.cpp

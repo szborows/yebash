@@ -93,7 +93,7 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
     if (arrow) {
         switch (arrow.value()) {
             case Arrow::right:
-                printBuffer = historySuggestion->get().substr(buffer.getPosition());
+                printBuffer = history.get().substr(buffer.getPosition());
                 printBufferPos = printBuffer.begin();
                 return c;
             default:
