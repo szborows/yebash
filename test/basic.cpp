@@ -183,3 +183,21 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     tearDown();
 }
 
+TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
+    History history = createHistory({"abc", "abcd"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    EscapeCodeGenerator escapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
+    LineBuffer buf;
+
+    yebash(suggestion, printer, buf, 'a');
+    REQUIRE(output.str() == "bcd");
+    yebash(suggestion, printer, buf, '\e');
+    yebash(suggestion, printer, buf, '[');
+    yebash(suggestion, printer, buf, 'C');
+    REQUIRE(output.str() == "bcd");
+    // TODO: check printBuffer
+}
+
