@@ -16,6 +16,7 @@
 #include "Printer.hpp"
 #include "ArrowHandler.hpp"
 #include "LineBuffer.hpp"
+#include "KeyHandlers.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 // http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
@@ -27,20 +28,12 @@ thread_local std::string printBuffer;
 thread_local std::string::iterator printBufferPos;
 
 thread_local History gHistory;
-thread_local History::const_iterator gHistoryPos;
-
-thread_local char arrowIndicator = 0;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
 constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
-
-CharOpt newlineHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
-CharOpt tabHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
-CharOpt backspaceHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
-CharOpt regularCharHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
 
 thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
@@ -68,6 +61,8 @@ void printSuggestion(HistorySuggestion &history, Printer &printer, LineBuffer &b
     printer.print(suggestion.value().c_str() + pattern.length(), suggestionColor.value_or(defaultSuggestionColor), offset);
 }
 
+namespace yb {
+
 CharOpt newlineHandler(HistorySuggestion &, Printer &, LineBuffer &buffer, Char) {
     buffer.clear();
     return {};
@@ -88,8 +83,6 @@ CharOpt tabHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buf
     printSuggestion(history, printer, buffer, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
-
-namespace yb {
 
 unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, unsigned char c) {
     // TODO: uncomment later
