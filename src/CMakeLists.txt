@@ -1,4 +1,5 @@
 set(SOURCES
+    main.cpp
     yebash.cpp
     History.cpp
     HistorySuggestion.cpp

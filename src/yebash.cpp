@@ -1,14 +1,6 @@
-#include <dlfcn.h>
-#include <unistd.h>
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <array>
 #include <functional>
-#include <stdexcept>
-#include <memory>
 #include <unordered_map>
+#include <memory>
 
 #include "yebash.hpp"
 #include "HistorySuggestion.hpp"
@@ -24,22 +16,12 @@
 
 using namespace yb;
 
-thread_local std::string printBuffer;
-thread_local std::string::iterator printBufferPos;
-
-thread_local History gHistory;
-
-using ReadSignature = ssize_t (*)(int, void*, size_t);
-static thread_local ReadSignature realRead = nullptr;
+extern thread_local std::string printBuffer;
+extern thread_local std::string::iterator printBufferPos;
+extern thread_local std::unique_ptr<ArrowHandler> arrowHandler;
 
 constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
-
-thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
-thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
-thread_local std::unique_ptr<Printer> printer = nullptr;
-thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
-thread_local std::unique_ptr<LineBuffer> lineBuffer = nullptr;
 
 thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, LineBuffer &, Char)>> handlers = {
     {0x06, tabHandler},
@@ -117,46 +99,4 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
 }
 
 } // namespace yb
-
-static inline bool is_terminal_input(int fd) {
-    return isatty(fd) && fd == 0;
-}
-
-static inline void putCharToReadBuffer(char *buf) {
-    *buf = *printBufferPos;
-    lineBuffer->insert(*printBufferPos++);
-    if (printBufferPos == printBuffer.end()) {
-        printBuffer.erase(printBuffer.begin(), printBuffer.end());
-    }
-}
-
-ssize_t read(int fd, void *buf, size_t count) {
-    if (is_terminal_input(fd) && printBuffer.length()) {
-        putCharToReadBuffer(static_cast<char *>(buf));
-        return 1;
-    }
-    auto returnValue = realRead(fd, buf, count);
-    if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, *static_cast<unsigned char *>(buf));
-    }
-    return returnValue;
-}
-
-__attribute__((constructor))
-static void yebashInit()  {
-    if (!realRead) {
-        realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
-    }
-    std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
-    if (!historyFile.is_open()) {
-        throw std::runtime_error{"Could not open history file"};
-    }
-    gHistory.read(historyFile);
-    historyFile.close();
-    historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
-    escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
-    printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
-    arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
-    lineBuffer = std::make_unique<LineBuffer>();
-}
 
