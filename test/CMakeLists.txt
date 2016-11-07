@@ -14,5 +14,12 @@ if (COVERAGE)
     add_custom_target(tests-cov
         DEPENDS clean-coverage tests-run
         COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR})
+    add_custom_target(tests-cov-html
+        DEPENDS clean-coverage tests-run
+        COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} --html --html-details -o tests.html)
 endif()
+
+add_custom_target(tests-valgrind
+    DEPENDS tests
+    COMMAND valgrind ./tests)
 
