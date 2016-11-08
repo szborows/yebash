@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 job=$1

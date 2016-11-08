@@ -29,6 +29,8 @@ thread_local std::string::iterator printBufferPos;
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
+static constexpr const size_t defaultLineBufferSize = 1024;
+
 static inline bool is_terminal_input(int fd) {
     return isatty(fd) && fd == 0;
 }
@@ -67,7 +69,7 @@ static inline void createGlobals() {
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
-    lineBuffer = std::make_unique<LineBuffer>();
+    lineBuffer = std::make_unique<LineBuffer>(defaultLineBufferSize);
 }
 
 __attribute__((constructor))

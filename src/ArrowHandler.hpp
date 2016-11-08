@@ -5,6 +5,7 @@
 #include <functional>
 #include <experimental/optional>
 #include <unordered_map>
+#include <algorithm>
 
 namespace yb {
 
@@ -31,8 +32,11 @@ public:
         escapeCodes_[Arrow::up] = escapeCodeGenerator_.cursorUp(1);
         escapeCodes_[Arrow::right] = escapeCodeGenerator_.cursorForward(1);
         escapeCodes_[Arrow::down] = escapeCodeGenerator_.cursorDown(1);
-        currentState_.reserve(5);
-    } 
+        currentState_.reserve(std::get<1>(*std::max_element(escapeCodes_.begin(), escapeCodes_.end(),
+                    [] (const std::unordered_map<Arrow, std::string>::value_type &A, const std::unordered_map<Arrow, std::string>::value_type &B) {
+                        return A.second.length() > B.second.length();
+                    })).length() + 1);
+    }
 
     inline ArrowOpt handle(unsigned char c) {
         currentState_ += c;

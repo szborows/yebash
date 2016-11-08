@@ -12,11 +12,17 @@ class LineBuffer final {
     using Iterator = Container::iterator;
     Container buffer_;
     Iterator position_;
+    const size_t defaultLineBufferSize = 1024;
 
 public:
 
     LineBuffer() {
-        buffer_.reserve(1024);
+        buffer_.reserve(defaultLineBufferSize);
+        position_ = buffer_.begin();
+    }
+
+    explicit LineBuffer(size_t size) {
+        buffer_.reserve(size);
         position_ = buffer_.begin();
     }
 
