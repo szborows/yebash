@@ -26,6 +26,12 @@ public:
         return *this;
     }
 
+    PrintBuffer &operator =(std::string &s) {
+        buffer_ = s;
+        position_ = buffer_.begin();
+        return *this;
+    }
+
     CharOpt getNextChar() {
         if (position_ != buffer_.end()) {
             return *position_++;
