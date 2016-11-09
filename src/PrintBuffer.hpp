@@ -37,7 +37,7 @@ public:
         return position_ == buffer_.end();
     }
 
-    bool operator==(const char *a) {
+    bool operator==(const char *a) const {
         return buffer_ == a;
     }
 
