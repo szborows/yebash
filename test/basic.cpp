@@ -30,8 +30,9 @@ void tearDown() {
     History history;
     history.read(ss);
     LineBuffer buf;
+    PrintBuffer printBuffer;
     HistorySuggestion suggestion(history);
-    yebash(suggestion, printer, buf, '\n');
+    yebash(suggestion, printer, buf, printBuffer, '\n');
 }
 } // anon namespace
 
@@ -40,13 +41,14 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
     auto testCharacter = [] (char const c) {
         History history = createHistory({});
         HistorySuggestion suggestion(history);
+        PrintBuffer printBuffer;
 
         std::stringstream output;
         EscapeCodeGenerator escapeCodeGenerator;
         Printer printer(output, escapeCodeGenerator);
         LineBuffer buf;
 
-        auto result = yebash(suggestion, printer, buf, c);
+        auto result = yebash(suggestion, printer, buf, printBuffer, c);
 
         REQUIRE(result == c);
         REQUIRE(output.str() == "");
@@ -68,9 +70,10 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     EscapeCodeGenerator escapeCodeGenerator;
     Printer printer(output, escapeCodeGenerator);
     LineBuffer buf;
+    PrintBuffer printBuffer;
 
     auto character = 'a';
-    auto result = yebash(suggestion, printer, buf, character);
+    auto result = yebash(suggestion, printer, buf, printBuffer, character);
 
     REQUIRE(result == character);
     REQUIRE(output.str() == "bc2");
@@ -78,10 +81,10 @@ TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_
     tearDown();
 }
 
-unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, LineBuffer &buf, int n) {
+unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, LineBuffer &buf, PrintBuffer &printBuffer, int n) {
     unsigned char result;
     for (int i = 0; i < n; i++) {
-        result = yebash(suggestion, printer, buf, 0x06);
+        result = yebash(suggestion, printer, buf, printBuffer, 0x06);
     }
     return result;
 }
@@ -95,35 +98,36 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
     EscapeCodeGenerator escapeCodeGenerator;
     Printer printer(output, escapeCodeGenerator);
     LineBuffer buf;
+    PrintBuffer printBuffer;
 
-    yebash(suggestion, printer, buf, 'a');
+    yebash(suggestion, printer, buf, printBuffer, 'a');
 
     SECTION( "one switch" ) {
-        auto result = rollSuggestions(suggestion, printer, buf, 1);
+        auto result = rollSuggestions(suggestion, printer, buf, printBuffer, 1);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbc");
     }
 
     SECTION( "two switches" ) {
-        auto result = rollSuggestions(suggestion, printer, buf, 2);
+        auto result = rollSuggestions(suggestion, printer, buf, printBuffer, 2);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
     SECTION( "third switch to empty suggestion" ) {
-        auto result = rollSuggestions(suggestion, printer, buf, 3);
+        auto result = rollSuggestions(suggestion, printer, buf, printBuffer, 3);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
     SECTION( "no more suggestions" ) {
-        auto result = rollSuggestions(suggestion, printer, buf, 4);
+        auto result = rollSuggestions(suggestion, printer, buf, printBuffer, 4);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcb");
     }
 
     SECTION( "go back to the first suggestion" ) {
-        auto result = rollSuggestions(suggestion, printer, buf, 5);
+        auto result = rollSuggestions(suggestion, printer, buf, printBuffer, 5);
         REQUIRE(result == 0);
         REQUIRE(output.str() == "bcdbcbbcd");
     }
@@ -141,19 +145,20 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
     EscapeCodeGenerator escapeCodeGenerator;
     Printer printer(output, escapeCodeGenerator);
     LineBuffer buf;
+    PrintBuffer printBuffer;
 
     constexpr char backspace = 0x7f;
 
-    yebash(suggestion, printer, buf, '1');
-    yebash(suggestion, printer, buf, '2');
-    yebash(suggestion, printer, buf, '3');
-    yebash(suggestion, printer, buf, '4');
+    yebash(suggestion, printer, buf, printBuffer, '1');
+    yebash(suggestion, printer, buf, printBuffer, '2');
+    yebash(suggestion, printer, buf, printBuffer, '3');
+    yebash(suggestion, printer, buf, printBuffer, '4');
     REQUIRE(output.str() == "2335");
 
-    yebash(suggestion, printer, buf, backspace);
+    yebash(suggestion, printer, buf, printBuffer, backspace);
     REQUIRE(output.str() == "2335");
 
-    yebash(suggestion, printer, buf, '4');
+    yebash(suggestion, printer, buf, printBuffer, '4');
     REQUIRE(output.str() == "23355");
 
     tearDown();
@@ -169,14 +174,15 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     EscapeCodeGenerator escapeCodeGenerator;
     Printer printer(output, escapeCodeGenerator);
     LineBuffer buf;
+    PrintBuffer printBuffer;
 
     constexpr char backspace = 0x7f;
 
-    yebash(suggestion, printer, buf, '1');
+    yebash(suggestion, printer, buf, printBuffer, '1');
     REQUIRE(output.str() == "2345");
 
     for (int i = 0; i < 1 << 10; ++i) {
-        yebash(suggestion, printer, buf, backspace);
+        yebash(suggestion, printer, buf, printBuffer, backspace);
     }
     REQUIRE(output.str() == "2345");
 
@@ -191,13 +197,15 @@ TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
     EscapeCodeGenerator escapeCodeGenerator;
     Printer printer(output, escapeCodeGenerator);
     LineBuffer buf;
+    PrintBuffer printBuffer;
 
-    yebash(suggestion, printer, buf, 'a');
+    yebash(suggestion, printer, buf, printBuffer, 'a');
     REQUIRE(output.str() == "bcd");
-    yebash(suggestion, printer, buf, '\e');
-    yebash(suggestion, printer, buf, '[');
-    yebash(suggestion, printer, buf, 'C');
+    REQUIRE(printBuffer == "");
+    yebash(suggestion, printer, buf, printBuffer, '\e');
+    yebash(suggestion, printer, buf, printBuffer, '[');
+    yebash(suggestion, printer, buf, printBuffer, 'C');
     REQUIRE(output.str() == "bcd");
-    // TODO: check printBuffer
+    REQUIRE(printBuffer == "bcd");
 }
 

@@ -6,14 +6,21 @@
 
 namespace yb {
 
-class PrintBuffer {
+class PrintBuffer final {
 
-    std::string buffer_;
-    std::string::iterator position_;
+    using Container = std::string;
+    using Iterator = std::string::const_iterator;
+    Container buffer_;
+    Iterator position_;
 
 public:
 
-    PrintBuffer &operator =(std::string &s) {
+    PrintBuffer() {
+        buffer_.reserve(1024);
+        position_ = buffer_.end();
+    }
+
+    PrintBuffer &operator =(std::string &&s) {
         buffer_ = s;
         position_ = buffer_.begin();
         return *this;
@@ -24,6 +31,14 @@ public:
             return *position_++;
         }
         return {};
+    }
+
+    bool empty() const {
+        return position_ == buffer_.end();
+    }
+
+    bool operator==(const char *a) {
+        return buffer_ == a;
     }
 
 };

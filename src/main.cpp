@@ -12,6 +12,7 @@
 #include "ArrowHandler.hpp"
 #include "LineBuffer.hpp"
 #include "EscapeCodeGenerator.hpp"
+#include "PrintBuffer.hpp"
 
 using namespace yb;
 
@@ -20,11 +21,10 @@ static thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullp
 static thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 static thread_local std::unique_ptr<Printer> printer = nullptr;
 static thread_local std::unique_ptr<LineBuffer> lineBuffer = nullptr;
+static thread_local std::unique_ptr<PrintBuffer> printBuffer = nullptr;
 
 // TODO: these vars should also be static
 thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
-thread_local std::string printBuffer;
-thread_local std::string::iterator printBufferPos;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
@@ -36,21 +36,21 @@ static inline bool is_terminal_input(int fd) {
 }
 
 static inline void putCharToReadBuffer(char *buf) {
-    *buf = *printBufferPos;
-    lineBuffer->insert(*printBufferPos++);
-    if (printBufferPos == printBuffer.end()) {
-        printBuffer.erase(printBuffer.begin(), printBuffer.end());
+    auto c = printBuffer->getNextChar();
+    if (c) {
+        *buf = c.value();
+        lineBuffer->insert(c.value());
     }
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-    if (is_terminal_input(fd) && printBuffer.length()) {
+    if (is_terminal_input(fd) && !printBuffer->empty()) {
         putCharToReadBuffer(static_cast<char *>(buf));
         return 1;
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, *printBuffer, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
@@ -70,6 +70,7 @@ static inline void createGlobals() {
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
     lineBuffer = std::make_unique<LineBuffer>(defaultLineBufferSize);
+    printBuffer = std::make_unique<PrintBuffer>();
 }
 
 __attribute__((constructor))
