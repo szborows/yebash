@@ -4,7 +4,7 @@
 
 namespace yb {
 
-struct HistorySuggestion {
+struct HistorySuggestion final {
 
     HistorySuggestion(const History &history) : history_(history) { position_ = history_.begin(); }
 

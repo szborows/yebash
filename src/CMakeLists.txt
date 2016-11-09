@@ -1,7 +1,7 @@
 set(SOURCES
+    main.cpp
     yebash.cpp
     History.cpp
-    KeyHandlers.cpp
     HistorySuggestion.cpp
     Printer.cpp
 )
