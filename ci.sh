@@ -22,5 +22,8 @@ case "$job" in
     "coverage")
         cmake .. -DCOVERAGE=ON
         make tests-cov -j$cores ;;
+    *)
+        cmake ..
+        make tests-run ;;
 esac
 

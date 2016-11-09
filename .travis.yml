@@ -15,9 +15,8 @@ matrix:
         - env:
             - COMPILER=g++-6
             - JOB=coverage
-        - env: 
+        - env:
             - COMPILER=clang++-3.8
-            - JOB=coverage
         - env:
             - COMPILER=g++-6
               JOB=valgrind
