@@ -16,12 +16,12 @@
 
 using namespace yb;
 
-static thread_local History gHistory;
+static thread_local History history;
 static thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 static thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 static thread_local std::unique_ptr<Printer> printer = nullptr;
 static thread_local std::unique_ptr<LineBuffer> lineBuffer = nullptr;
-static thread_local std::unique_ptr<PrintBuffer> printBuffer = nullptr;
+static thread_local PrintBuffer printBuffer;
 
 // TODO: these vars should also be static
 thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
@@ -36,7 +36,7 @@ static inline bool is_terminal_input(int fd) {
 }
 
 static inline void putCharToReadBuffer(char *buf) {
-    auto c = printBuffer->getNextChar();
+    auto c = printBuffer.getNextChar();
     if (c) {
         *buf = c.value();
         lineBuffer->insert(c.value());
@@ -44,13 +44,13 @@ static inline void putCharToReadBuffer(char *buf) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-    if (is_terminal_input(fd) && !printBuffer->empty()) {
+    if (is_terminal_input(fd) && !printBuffer.empty()) {
         putCharToReadBuffer(static_cast<char *>(buf));
         return 1;
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, *printBuffer, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, printBuffer, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
@@ -60,17 +60,16 @@ static inline void loadHistory() {
     if (!historyFile.is_open()) {
         throw std::runtime_error{"Could not open history file"};
     }
-    gHistory.read(historyFile);
+    history.read(historyFile);
     historyFile.close();
 }
 
 static inline void createGlobals() {
-    historySuggestion = std::make_unique<HistorySuggestion>(gHistory);
+    historySuggestion = std::make_unique<HistorySuggestion>(history);
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
     lineBuffer = std::make_unique<LineBuffer>(defaultLineBufferSize);
-    printBuffer = std::make_unique<PrintBuffer>();
 }
 
 __attribute__((constructor))
