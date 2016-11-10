@@ -50,7 +50,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, printBuffer, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }

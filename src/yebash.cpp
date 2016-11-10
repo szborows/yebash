@@ -17,8 +17,6 @@
 
 using namespace yb;
 
-extern thread_local std::unique_ptr<ArrowHandler> arrowHandler;
-
 constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
 
@@ -65,12 +63,12 @@ CharOpt tabHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buf
     return Char{0}; // TODO: this does not seem to work.
 }
 
-unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, unsigned char c) {
+unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, ArrowHandler &arrowHandler, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
     // TODO: arrowHandler should be a parameter
-    auto arrow = arrowHandler->handle(c);
+    auto arrow = arrowHandler.handle(c);
     if (arrow) {
         switch (arrow.value()) {
             case Arrow::right:
