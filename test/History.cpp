@@ -14,10 +14,13 @@ TEST_CASE( "can read commands from input", "History.read" ) {
     }
     History history;
     history.read(inputStream);
+    size_t i = 0;
     for (std::pair<std::vector<std::string>::iterator, History::const_iterator> it(inputList.end() - 1, history.begin());
             it.second != history.end();
             --it.first, ++it.second) {
         REQUIRE(*it.first == *it.second);
+        i++;
     }
+    REQUIRE(i == inputList.size());
 }
 
