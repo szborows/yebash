@@ -3,20 +3,20 @@
 
 using namespace yb;
 
-TEST_CASE( "is empty after creating", "PrintBuffer.empty" ) {
+TEST_CASE( "is empty after creating", "[PrintBuffer.empty]" ) {
     PrintBuffer pbuf;
     REQUIRE(pbuf == "");
     REQUIRE(pbuf.empty());
 }
 
-TEST_CASE( "does not return any value if empty", "PrintBuffer.noValueWhenEmpty" ) {
+TEST_CASE( "does not return any value if empty", "[PrintBuffer.noValueWhenEmpty]" ) {
     PrintBuffer pbuf;
     for (int i = 0; i < 100; i++) {
         REQUIRE(pbuf.getNextChar() == CharOpt{});
     }
 }
 
-TEST_CASE( "can be assigned to the string", "PrintBuffer.stringMoveAndCopy" ) {
+TEST_CASE( "can be assigned to the string", "[PrintBuffer.stringMoveAndCopy]" ) {
     PrintBuffer pbuf;
     pbuf = "Some string";
     REQUIRE(pbuf == "Some string");
@@ -30,7 +30,7 @@ TEST_CASE( "can be assigned to the string", "PrintBuffer.stringMoveAndCopy" ) {
     REQUIRE(pbuf.empty() == false);
 }
 
-TEST_CASE( "can get chars out of PrintBuffer", "PrintBuffer.getChars" ) {
+TEST_CASE( "can get chars out of PrintBuffer", "[PrintBuffer.getChars]" ) {
     PrintBuffer pbuf;
     std::string test{"test string"};
     pbuf = test;

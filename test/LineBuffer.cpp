@@ -3,7 +3,7 @@
 
 using namespace yb;
 
-TEST_CASE( "can insert a char to the empty LineBuffer", "LineBuffer.insert" ) {
+TEST_CASE( "can insert a char to the empty LineBuffer", "[LineBuffer.insert]" ) {
     auto testCharacter = [=] (char c) {
         LineBuffer buf;
         buf.insert(c);
@@ -16,7 +16,7 @@ TEST_CASE( "can insert a char to the empty LineBuffer", "LineBuffer.insert" ) {
     for_each(domain.begin(), domain.end(), testCharacter);
 }
 
-TEST_CASE( "can insert multiple chars", "LineBuffer.multiple" ) {
+TEST_CASE( "can insert multiple chars", "[LineBuffer.multiple]" ) {
     LineBuffer buf;
     buf.insert('a');
     REQUIRE(std::string{buf.get()} == "a");
@@ -29,7 +29,7 @@ TEST_CASE( "can insert multiple chars", "LineBuffer.multiple" ) {
     REQUIRE(buf.getPosition() == 3);
 }
 
-TEST_CASE( "remove can't break it", "LineBuffer.emptyRemove" ) {
+TEST_CASE( "remove can't break it", "[LineBuffer.emptyRemove]" ) {
     LineBuffer buf;
     for (int i = 0; i < 100; i++) {
         buf.remove();
@@ -38,7 +38,7 @@ TEST_CASE( "remove can't break it", "LineBuffer.emptyRemove" ) {
     }
 }
 
-TEST_CASE( "can delete last character", "LineBuffer.deleteLast" ) {
+TEST_CASE( "can delete last character", "[LineBuffer.deleteLast]" ) {
     LineBuffer buf;
     buf.insert('a');
     buf.insert('b');
@@ -52,7 +52,7 @@ TEST_CASE( "can delete last character", "LineBuffer.deleteLast" ) {
     REQUIRE(std::string{buf.get()} == "a");
 }
 
-TEST_CASE( "can move in buffer and insert/delete characters", "LineBuffer.move" ) {
+TEST_CASE( "can move in buffer and insert/delete characters", "[LineBuffer.move]" ) {
     LineBuffer buf;
     buf.insert('a');
     buf.insert('b');
