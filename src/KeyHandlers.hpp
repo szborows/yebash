@@ -8,7 +8,7 @@
 namespace yb {
 
 CharOpt newlineHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
-CharOpt tabHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
+CharOpt nextSuggestionHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
 CharOpt backspaceHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
 CharOpt regularCharHandler(HistorySuggestion &, Printer &, LineBuffer &, Char);
 

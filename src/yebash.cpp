@@ -21,7 +21,7 @@ constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
 
 thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, LineBuffer &, Char)>> handlers = {
-    {0x06, tabHandler},
+    {0x06, nextSuggestionHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
     {0x7f, backspaceHandler}
@@ -58,7 +58,7 @@ CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, LineBuf
     return {};
 }
 
-CharOpt tabHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, Char) {
+CharOpt nextSuggestionHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, Char) {
     printSuggestion(history, printer, buffer, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
