@@ -23,7 +23,7 @@ static thread_local History history;
 static thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 static thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 static thread_local std::unique_ptr<Printer> printer = nullptr;
-static thread_local std::unique_ptr<LineBuffer> lineBuffer = nullptr;
+static thread_local LineBuffer lineBuffer(defaultLineBufferSize);
 static thread_local PrintBuffer printBuffer(defaultPrintBufferSize);
 
 // TODO: these vars should also be static
@@ -40,7 +40,7 @@ static inline void putCharToReadBuffer(char *buf) {
     auto c = printBuffer.getNextChar();
     if (c) {
         *buf = c.value();
-        lineBuffer->insert(c.value());
+        lineBuffer.insert(c.value());
     }
 }
 
@@ -51,7 +51,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, *lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
     }
     return returnValue;
 }
@@ -70,7 +70,6 @@ static inline void createGlobals() {
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
-    lineBuffer = std::make_unique<LineBuffer>(defaultLineBufferSize);
 }
 
 __attribute__((constructor))
