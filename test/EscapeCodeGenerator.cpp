@@ -3,7 +3,7 @@
 
 using namespace yb;
 
-TEST_CASE( "generates nothing", "EscapeCodeGenerator.nothing" ) {
+TEST_CASE( "generates nothing", "[EscapeCodeGenerator.nothing]" ) {
     EscapeCodeGenerator gen;
     for (int i = 0; i < 100; i++)
         REQUIRE(gen.cursorUp(i) == "");

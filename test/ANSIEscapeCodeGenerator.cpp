@@ -61,13 +61,13 @@ TEST_CASE( "can generate proper escape codes for moving backward", "[ANSIEscapeC
     }
 }
 
-TEST_CASE( "generates proper escape code for clearing the line", "ANSIEscapeCodeGenerator.clearTerminalLine" ) {
+TEST_CASE( "generates proper escape code for clearing the line", "[ANSIEscapeCodeGenerator.clearTerminalLine]" ) {
     ANSIEscapeCodeGenerator gen;
     auto result = gen.clearTerminalLine();
     REQUIRE(result == "\033[K");
 }
 
-TEST_CASE( "generates proper escape codes for colors", "ANSIEscapeCodeGenerator.colors" ) {
+TEST_CASE( "generates proper escape codes for colors", "[ANSIEscapeCodeGenerator.colors]" ) {
     ANSIEscapeCodeGenerator gen;
     for (int i = 0; i < 98; i++) {
         testEscapeCodeWithNumber(gen.setColor(static_cast<Color>(i)), i, 'm');

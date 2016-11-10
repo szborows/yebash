@@ -9,16 +9,13 @@
 #include "ArrowHandler.hpp"
 #include "LineBuffer.hpp"
 #include "KeyHandlers.hpp"
+#include "PrintBuffer.hpp"
 
 // https://www.akkadia.org/drepper/tls.pdf
 // http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 // http://www.linusakesson.net/programming/tty/
 
 using namespace yb;
-
-extern thread_local std::string printBuffer;
-extern thread_local std::string::iterator printBufferPos;
-extern thread_local std::unique_ptr<ArrowHandler> arrowHandler;
 
 constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
@@ -66,17 +63,16 @@ CharOpt tabHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buf
     return Char{0}; // TODO: this does not seem to work.
 }
 
-unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, unsigned char c) {
+unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, ArrowHandler &arrowHandler, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
     // TODO: arrowHandler should be a parameter
-    auto arrow = arrowHandler->handle(c);
+    auto arrow = arrowHandler.handle(c);
     if (arrow) {
         switch (arrow.value()) {
             case Arrow::right:
                 printBuffer = history.get().substr(buffer.getPosition());
-                printBufferPos = printBuffer.begin();
                 return c;
             default:
                 return c;

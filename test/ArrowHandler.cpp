@@ -20,7 +20,7 @@ void testArrow(ArrowHandler &handler, char c, ArrowHandler::ArrowOpt a) {
 
 } // namespace anon
 
-TEST_CASE( "no respone when on normal characters", "ArrowHandler.noResponse" ) {
+TEST_CASE( "no respone when on normal characters", "[ArrowHandler.noResponse]" ) {
     ANSIEscapeCodeGenerator gen;
     ArrowHandler handler(gen);
     auto testCharacter = [&] (const unsigned char c) {
@@ -31,7 +31,7 @@ TEST_CASE( "no respone when on normal characters", "ArrowHandler.noResponse" ) {
     for_each(begin(domain), end(domain), testCharacter);
 }
 
-TEST_CASE( "proper respone on arrow escape code given", "ArrowHandler.arrows" ) {
+TEST_CASE( "proper respone on arrow escape code given", "[ArrowHandler.arrows]" ) {
     ANSIEscapeCodeGenerator gen;
     ArrowHandler handler(gen);
     SECTION( "up arrow" ) {
@@ -48,7 +48,7 @@ TEST_CASE( "proper respone on arrow escape code given", "ArrowHandler.arrows" ) 
     }
 }
 
-TEST_CASE( "gives proper responses on multiple arrows", "ArrowHandler.multiple" ) {
+TEST_CASE( "gives proper responses on multiple arrows", "[ArrowHandler.multiple]" ) {
     ANSIEscapeCodeGenerator gen;
     ArrowHandler handler(gen);
     SECTION( "up arrows" ) {
@@ -74,7 +74,7 @@ TEST_CASE( "gives proper responses on multiple arrows", "ArrowHandler.multiple" 
 	// TODO: add random arrows test
 }
 
-TEST_CASE( "returns nothing on bad data", "ArrowHandler.bad" ) {
+TEST_CASE( "returns nothing on bad data", "[ArrowHandler.bad]" ) {
     ANSIEscapeCodeGenerator gen;
     ArrowHandler handler(gen);
     std::string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
