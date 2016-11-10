@@ -6,6 +6,7 @@ set(SOURCES
     ArrowHandler.cpp
     LineBuffer.cpp
     PrintBuffer.cpp
+    History.cpp
     basic.cpp)
 
 add_executable(tests ${SOURCES})
