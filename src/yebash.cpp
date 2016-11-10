@@ -74,6 +74,9 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
             case Arrow::right:
                 printBuffer = history.get().substr(buffer.getPosition());
                 return c;
+            case Arrow::left:
+                buffer.move(-1);
+                return c;
             default:
                 return c;
         }
