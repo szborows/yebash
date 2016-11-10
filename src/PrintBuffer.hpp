@@ -12,11 +12,17 @@ class PrintBuffer final {
     using Iterator = std::string::const_iterator;
     Container buffer_;
     Iterator position_;
+    const size_t defaultBufferSize_ = 1024;
 
 public:
 
     PrintBuffer() {
-        buffer_.reserve(1024);
+        buffer_.reserve(defaultBufferSize_);
+        position_ = buffer_.end();
+    }
+
+    explicit PrintBuffer(size_t size) {
+        buffer_.reserve(size);
         position_ = buffer_.end();
     }
 
