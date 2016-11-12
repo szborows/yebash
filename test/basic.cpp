@@ -9,7 +9,6 @@
 #include <sstream>
 
 using namespace yb;
-using namespace std;
 
 namespace {
 
@@ -25,6 +24,7 @@ void tearDown() {
     HistorySuggestion suggestion(history);
     yebash(suggestion, printer, buf, printBuffer, arrowHandler, '\n');
 }
+
 } // anon namespace
 
 TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
@@ -45,8 +45,8 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
         REQUIRE(output.str() == "");
     };
 
-    string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
-    for_each(begin(domain), end(domain), testCharacter);
+    std::string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
+    for_each(std::begin(domain), std::end(domain), testCharacter);
 
     tearDown();
 }

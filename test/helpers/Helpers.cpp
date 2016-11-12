@@ -14,5 +14,5 @@ yb::History createHistory(std::initializer_list<std::string> const &commands) {
     return history;
 }
 
-}
+} // namespace Helpers
 
