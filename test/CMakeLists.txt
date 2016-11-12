@@ -8,6 +8,7 @@ set(SOURCES
     LineBuffer.cpp
     PrintBuffer.cpp
     History.cpp
+    HistorySuggestion.cpp
     basic.cpp)
 
 add_executable(tests ${SOURCES})
