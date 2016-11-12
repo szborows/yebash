@@ -9,7 +9,7 @@ set(SOURCES
     PrintBuffer.cpp
     History.cpp
     HistorySuggestion.cpp
-    basic.cpp)
+    yebash.cpp)
 
 add_executable(tests ${SOURCES})
 target_link_libraries(tests yebash)
