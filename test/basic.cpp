@@ -2,6 +2,7 @@
 #include "../src/History.hpp"
 
 #include "catch.hpp"
+#include "helpers/Helpers.hpp"
 #include <initializer_list>
 #include <iostream>
 #include <algorithm>
@@ -11,16 +12,6 @@ using namespace yb;
 using namespace std;
 
 namespace {
-
-History createHistory(initializer_list<string> const& commands) {
-    stringstream ss;
-    for (auto && command: commands) {
-        ss << command << std::endl;
-    }
-    History history;
-    history.read(ss);
-    return history;
-}
 
 void tearDown() {
     std::stringstream output, ss;
@@ -39,7 +30,7 @@ void tearDown() {
 TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
 
     auto testCharacter = [] (char const c) {
-        History history = createHistory({});
+        History history = Helpers::createHistory({});
         HistorySuggestion suggestion(history);
         PrintBuffer printBuffer;
         EscapeCodeGenerator escapeCodeGenerator;
@@ -63,7 +54,7 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
 
 TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_preserved]"  ) {
 
-    History history = createHistory({"abc1", "abc2"});
+    History history = Helpers::createHistory({"abc1", "abc2"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -92,7 +83,7 @@ unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, L
 
 TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 
-    History history = createHistory({"a", "ab", "abc", "abcd", "bcd"});
+    History history = Helpers::createHistory({"a", "ab", "abc", "abcd", "bcd"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -140,7 +131,7 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 
 TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 
-    History history = createHistory({"12345", "def", "trolo", "abc", "123"});
+    History history = Helpers::createHistory({"12345", "def", "trolo", "abc", "123"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -170,7 +161,7 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 
 TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
 
-    History history = createHistory({"12345", "xyz"});
+    History history = Helpers::createHistory({"12345", "xyz"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -194,7 +185,7 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
 }
 
 TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
-    History history = createHistory({"abc", "abcd"});
+    History history = Helpers::createHistory({"abc", "abcd"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
