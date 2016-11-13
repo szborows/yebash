@@ -21,7 +21,7 @@ constexpr const Color defaultSuggestionColor = Color::grey;
 thread_local ColorOpt suggestionColor = {};
 
 thread_local std::unordered_map<Char, std::function<CharOpt(HistorySuggestion &, Printer &, LineBuffer &, Char)>> handlers = {
-    {0x06, tabHandler},
+    {0x06, nextSuggestionHandler},
     {0x0d, newlineHandler},
     {0x17, newlineHandler}, // TODO: this should delete one word
     {0x7f, backspaceHandler}
@@ -58,7 +58,7 @@ CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, LineBuf
     return {};
 }
 
-CharOpt tabHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, Char) {
+CharOpt nextSuggestionHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, Char) {
     printSuggestion(history, printer, buffer, 0);
     return Char{0}; // TODO: this does not seem to work.
 }
@@ -67,12 +67,14 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
-    // TODO: arrowHandler should be a parameter
     auto arrow = arrowHandler.handle(c);
     if (arrow) {
         switch (arrow.value()) {
             case Arrow::right:
                 printBuffer = history.get().substr(buffer.getPosition());
+                return c;
+            case Arrow::left:
+                buffer.move(-1);
                 return c;
             default:
                 return c;

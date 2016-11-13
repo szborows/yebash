@@ -1,4 +1,4 @@
-#include "../src/EscapeCodeGenerator.hpp"
+#include <EscapeCodeGenerator.hpp>
 #include "catch.hpp"
 
 using namespace yb;

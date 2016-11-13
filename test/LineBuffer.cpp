@@ -1,4 +1,4 @@
-#include "../src/LineBuffer.hpp"
+#include <LineBuffer.hpp>
 #include "catch.hpp"
 
 using namespace yb;

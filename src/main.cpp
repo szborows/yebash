@@ -23,11 +23,9 @@ static thread_local History history;
 static thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 static thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 static thread_local std::unique_ptr<Printer> printer = nullptr;
+static thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
 static thread_local LineBuffer lineBuffer(defaultLineBufferSize);
 static thread_local PrintBuffer printBuffer(defaultPrintBufferSize);
-
-// TODO: these vars should also be static
-thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
