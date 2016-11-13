@@ -67,7 +67,6 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
-    // TODO: arrowHandler should be a parameter
     auto arrow = arrowHandler.handle(c);
     if (arrow) {
         switch (arrow.value()) {
