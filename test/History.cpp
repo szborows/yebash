@@ -6,7 +6,7 @@
 
 using namespace yb;
 
-TEST_CASE( "can read commands from input", "History.read" ) {
+TEST_CASE( "can read commands from input", "[History.read]" ) {
     std::initializer_list<std::string> inputList{"", "test", "test2", "test3", "abcd", "a", "dcba", "", "test4", ""};
     auto history = Helpers::createHistory(inputList);
     size_t i = 0;

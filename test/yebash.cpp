@@ -27,7 +27,7 @@ void tearDown() {
 
 } // anon namespace
 
-TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
+TEST_CASE( "No suggestions when history is empty", "[yebash.empty_history]"  ) {
 
     auto testCharacter = [] (char const c) {
         History history = Helpers::createHistory({});
@@ -52,7 +52,7 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
 }
 
 
-TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_preserved]"  ) {
+TEST_CASE( "Order of commands from history is preserved", "[yebash.history_order_preserved]"  ) {
 
     History history = Helpers::createHistory({"abc1", "abc2"});
     HistorySuggestion suggestion(history);
@@ -81,7 +81,7 @@ unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, L
     return result;
 }
 
-TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
+TEST_CASE( "Suggestions can be switched", "[yebash.browsing_suggestions]" ) {
 
     History history = Helpers::createHistory({"a", "ab", "abc", "abcd", "bcd"});
     HistorySuggestion suggestion(history);
@@ -129,7 +129,7 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 }
 
 
-TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
+TEST_CASE( "Backspace invalidates suggestions", "[yebash.backspace]" ) {
 
     History history = Helpers::createHistory({"12345", "def", "trolo", "abc", "123"});
     HistorySuggestion suggestion(history);
@@ -159,7 +159,7 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 }
 
 
-TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
+TEST_CASE( "Backspaces can't break yebash", "[yebash.backspace_underflow]" ) {
 
     History history = Helpers::createHistory({"12345", "xyz"});
     HistorySuggestion suggestion(history);
@@ -184,7 +184,7 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     tearDown();
 }
 
-TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
+TEST_CASE( "accepts right arrow", "[yebash.rightArrow]" ) {
     History history = Helpers::createHistory({"abc", "abcd"});
     HistorySuggestion suggestion(history);
 
@@ -206,7 +206,7 @@ TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
     REQUIRE(printBuffer == "bcd");
 }
 
-TEST_CASE( "accepts left arrow", "basic.leftArrow" ) {
+TEST_CASE( "accepts left arrow", "[yebash.leftArrow]" ) {
     History history = Helpers::createHistory({"abc", "abcd"});
     HistorySuggestion suggestion(history);
 
