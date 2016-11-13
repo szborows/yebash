@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <boost/program_options.hpp>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include "yebash.hpp"
 #include "Defs.hpp"
@@ -72,9 +75,35 @@ static inline void createGlobals() {
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
 }
 
+static auto readConfiguration() {
+    namespace po = boost::program_options;
+
+    passwd *pw = getpwuid(getuid());
+    std::string homeDirectory = pw->pw_dir;
+
+    std::ifstream configFile{homeDirectory + "/.yebash.cfg"};
+    if (!configFile.is_open()) {
+        return; // config file doesn't exist
+    }
+
+    std::string completionColor;
+
+    po::options_description desc("Options");
+    desc.add_options()
+        ("color.completion", po::value<std::string>(&completionColor), "completionColor");
+
+    po::variables_map vm;
+    po::store(po::parse_config_file(configFile, desc), vm);
+    configFile.close();
+    po::notify(vm);
+
+    std::cerr << "color: " << completionColor << std::endl;
+}
+
 __attribute__((constructor))
 static void yebashInit()  {
     realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+    readConfiguration();
     loadHistory();
     createGlobals();
 }
