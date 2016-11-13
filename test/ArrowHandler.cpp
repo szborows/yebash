@@ -1,5 +1,5 @@
-#include "../src/ArrowHandler.hpp"
-#include "../src/EscapeCodeGenerator.hpp"
+#include <ArrowHandler.hpp>
+#include <EscapeCodeGenerator.hpp>
 #include "catch.hpp"
 #include <string>
 

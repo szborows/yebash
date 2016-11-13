@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/History.hpp"
+#include <History.hpp>
 #include <initializer_list>
 #include <string>
 

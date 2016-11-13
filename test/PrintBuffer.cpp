@@ -1,4 +1,4 @@
-#include "../src/PrintBuffer.hpp"
+#include <PrintBuffer.hpp>
 #include "catch.hpp"
 
 using namespace yb;

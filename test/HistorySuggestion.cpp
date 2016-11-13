@@ -1,4 +1,4 @@
-#include "../src/HistorySuggestion.hpp"
+#include <HistorySuggestion.hpp>
 #include "helpers/Helpers.hpp"
 #include "catch.hpp"
 

@@ -1,5 +1,5 @@
-#include "../src/yebash.hpp"
-#include "../src/History.hpp"
+#include <yebash.hpp>
+#include <History.hpp>
 
 #include "catch.hpp"
 #include "helpers/Helpers.hpp"

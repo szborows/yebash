@@ -1,4 +1,4 @@
-#include "../src/History.hpp"
+#include <History.hpp>
 #include "helpers/Helpers.hpp"
 #include "catch.hpp"
 
