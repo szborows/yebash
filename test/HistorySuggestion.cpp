@@ -16,6 +16,15 @@ void testSuggestions(HistorySuggestion &suggestion, std::string chars, std::init
 
 } // namespace anon
 
+TEST_CASE( "no suggestion on empty history", "[HistorySuggestion.empty]" ) {
+    auto history = Helpers::createHistory({});
+    HistorySuggestion suggestion(history);
+    std::string domain{"abcdefghijklmnopqrstuvwxyz01234567890-_"};
+    for (auto c : domain) {
+        REQUIRE(!suggestion.findSuggestion(std::string{c}));
+    }
+}
+
 TEST_CASE( "can get position", "[HistorySuggestion.position]" ) {
     auto history = Helpers::createHistory({"abcd", "bcde", "cdef", "defg", "efgh", "fghi"});
     HistorySuggestion suggestion(history);
