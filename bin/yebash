@@ -1,4 +1,4 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LD_PRELOAD=$DIR/../lib/libyebash.so /bin/bash
+LD_PRELOAD=$DIR/../lib/libyebash.so /bin/bash --rcfile <(echo 'unset LD_PRELOAD; . ~/.bashrc')
 exit $?
