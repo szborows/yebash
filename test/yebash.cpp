@@ -206,3 +206,27 @@ TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
     REQUIRE(printBuffer == "bcd");
 }
 
+TEST_CASE( "accepts left arrow", "basic.leftArrow" ) {
+    History history = Helpers::createHistory({"abc", "abcd"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    EscapeCodeGenerator escapeCodeGenerator;
+    ANSIEscapeCodeGenerator ansiEscapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
+    ArrowHandler arrowHandler(ansiEscapeCodeGenerator);
+    LineBuffer buf;
+    PrintBuffer printBuffer;
+
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, 'a');
+    REQUIRE(output.str() == "bcd");
+    REQUIRE(printBuffer == "");
+    REQUIRE(buf.getPosition() == 1);
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, '\e');
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, '[');
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, 'D');
+    REQUIRE(output.str() == "bcd");
+    REQUIRE(printBuffer == "");
+    REQUIRE(buf.getPosition() == 0);
+}
+
