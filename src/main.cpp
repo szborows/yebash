@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <boost/program_options.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 #include <sys/types.h>
 #include <pwd.h>
 
@@ -74,28 +74,21 @@ static inline void createGlobals() {
 }
 
 static auto readConfiguration() {
-    namespace po = boost::program_options;
-
     passwd *pw = getpwuid(getuid());
-    std::string homeDirectory = pw->pw_dir;
+    std::string const configFile = std::string{pw->pw_dir} + "/.yebash.cfg";
 
-    std::ifstream configFile{homeDirectory + "/.yebash.cfg"};
-    if (!configFile.is_open()) {
+    namespace pt = boost::property_tree;
+    try {
+        pt::ptree tree;
+        pt::ini_parser::read_ini(configFile, tree);
+        tree.get<std::string>("color.completion");
+    }
+    catch(pt::ini_parser::ini_parser_error const&) {
         return; // config file doesn't exist
     }
-
-    std::string completionColor;
-
-    po::options_description desc("Options");
-    desc.add_options()
-        ("color.completion", po::value<std::string>(&completionColor), "completionColor");
-
-    po::variables_map vm;
-    po::store(po::parse_config_file(configFile, desc), vm);
-    configFile.close();
-    po::notify(vm);
-
-    std::cerr << "color: " << completionColor << std::endl;
+    catch (pt::ptree_bad_path const&) {
+        return; // no color.completion in config file
+    }
 }
 
 __attribute__((constructor))
