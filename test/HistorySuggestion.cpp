@@ -7,7 +7,7 @@ using namespace yb;
 namespace {
 
 void testSuggestions(HistorySuggestion &suggestion, std::string chars, std::initializer_list<std::string> expected) {
-    for (std::pair<std::string::const_iterator, std::initializer_list<std::string>::const_iterator> it{chars.begin(), expected.begin()};
+    for (auto it = make_pair(chars.begin(), expected.begin());
             it.first != chars.end(); ++it.first, ++it.second) {
         auto result = suggestion.findSuggestion(std::string{*it.first});
         REQUIRE(result.value_or("") == *it.second);
