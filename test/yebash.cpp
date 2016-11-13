@@ -1,26 +1,16 @@
-#include "../src/yebash.hpp"
-#include "../src/History.hpp"
+#include <yebash.hpp>
+#include <History.hpp>
 
 #include "catch.hpp"
+#include "helpers/Helpers.hpp"
 #include <initializer_list>
 #include <iostream>
 #include <algorithm>
 #include <sstream>
 
 using namespace yb;
-using namespace std;
 
 namespace {
-
-History createHistory(initializer_list<string> const& commands) {
-    stringstream ss;
-    for (auto && command: commands) {
-        ss << command << std::endl;
-    }
-    History history;
-    history.read(ss);
-    return history;
-}
 
 void tearDown() {
     std::stringstream output, ss;
@@ -34,12 +24,13 @@ void tearDown() {
     HistorySuggestion suggestion(history);
     yebash(suggestion, printer, buf, printBuffer, arrowHandler, '\n');
 }
+
 } // anon namespace
 
-TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
+TEST_CASE( "No suggestions when history is empty", "[yebash.empty_history]"  ) {
 
     auto testCharacter = [] (char const c) {
-        History history = createHistory({});
+        History history = Helpers::createHistory({});
         HistorySuggestion suggestion(history);
         PrintBuffer printBuffer;
         EscapeCodeGenerator escapeCodeGenerator;
@@ -54,16 +45,16 @@ TEST_CASE( "No suggestions when history is empty", "[basic.empty_history]"  ) {
         REQUIRE(output.str() == "");
     };
 
-    string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
-    for_each(begin(domain), end(domain), testCharacter);
+    std::string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
+    for_each(std::begin(domain), std::end(domain), testCharacter);
 
     tearDown();
 }
 
 
-TEST_CASE( "Order of commands from history is preserved", "[basic.history_order_preserved]"  ) {
+TEST_CASE( "Order of commands from history is preserved", "[yebash.history_order_preserved]"  ) {
 
-    History history = createHistory({"abc1", "abc2"});
+    History history = Helpers::createHistory({"abc1", "abc2"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -90,9 +81,9 @@ unsigned char rollSuggestions(HistorySuggestion &suggestion, Printer &printer, L
     return result;
 }
 
-TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
+TEST_CASE( "Suggestions can be switched", "[yebash.browsing_suggestions]" ) {
 
-    History history = createHistory({"a", "ab", "abc", "abcd", "bcd"});
+    History history = Helpers::createHistory({"a", "ab", "abc", "abcd", "bcd"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -138,9 +129,9 @@ TEST_CASE( "Suggestions can be switched", "[basic.browsing_suggestions]" ) {
 }
 
 
-TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
+TEST_CASE( "Backspace invalidates suggestions", "[yebash.backspace]" ) {
 
-    History history = createHistory({"12345", "def", "trolo", "abc", "123"});
+    History history = Helpers::createHistory({"12345", "def", "trolo", "abc", "123"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -168,9 +159,9 @@ TEST_CASE( "Backspace invalidates suggestions", "[basic.backspace]" ) {
 }
 
 
-TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
+TEST_CASE( "Backspaces can't break yebash", "[yebash.backspace_underflow]" ) {
 
-    History history = createHistory({"12345", "xyz"});
+    History history = Helpers::createHistory({"12345", "xyz"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -193,8 +184,8 @@ TEST_CASE( "Backspaces can't break yebash", "[basic.backspace_underflow]" ) {
     tearDown();
 }
 
-TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
-    History history = createHistory({"abc", "abcd"});
+TEST_CASE( "accepts right arrow", "[yebash.rightArrow]" ) {
+    History history = Helpers::createHistory({"abc", "abcd"});
     HistorySuggestion suggestion(history);
 
     std::stringstream output;
@@ -213,5 +204,29 @@ TEST_CASE( "accepts right arrow", "basic.rightArrow" ) {
     yebash(suggestion, printer, buf, printBuffer, arrowHandler, 'C');
     REQUIRE(output.str() == "bcd");
     REQUIRE(printBuffer == "bcd");
+}
+
+TEST_CASE( "accepts left arrow", "[yebash.leftArrow]" ) {
+    History history = Helpers::createHistory({"abc", "abcd"});
+    HistorySuggestion suggestion(history);
+
+    std::stringstream output;
+    EscapeCodeGenerator escapeCodeGenerator;
+    ANSIEscapeCodeGenerator ansiEscapeCodeGenerator;
+    Printer printer(output, escapeCodeGenerator);
+    ArrowHandler arrowHandler(ansiEscapeCodeGenerator);
+    LineBuffer buf;
+    PrintBuffer printBuffer;
+
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, 'a');
+    REQUIRE(output.str() == "bcd");
+    REQUIRE(printBuffer == "");
+    REQUIRE(buf.getPosition() == 1);
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, '\e');
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, '[');
+    yebash(suggestion, printer, buf, printBuffer, arrowHandler, 'D');
+    REQUIRE(output.str() == "bcd");
+    REQUIRE(printBuffer == "");
+    REQUIRE(buf.getPosition() == 0);
 }
 

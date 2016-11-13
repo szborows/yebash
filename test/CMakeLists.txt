@@ -1,12 +1,15 @@
 include_directories(../src)
 set(SOURCES
     main.cpp
+    helpers/Helpers.cpp
     EscapeCodeGenerator.cpp
     ANSIEscapeCodeGenerator.cpp
     ArrowHandler.cpp
     LineBuffer.cpp
     PrintBuffer.cpp
-    basic.cpp)
+    History.cpp
+    HistorySuggestion.cpp
+    yebash.cpp)
 
 add_executable(tests ${SOURCES})
 target_link_libraries(tests yebash)
