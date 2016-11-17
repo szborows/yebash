@@ -60,7 +60,7 @@ CharOpt regularCharHandler(HistorySuggestion &history, Printer &printer, LineBuf
 
 CharOpt nextSuggestionHandler(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, Char) {
     printSuggestion(history, printer, buffer, 0);
-    return Char{0}; // TODO: this does not seem to work.
+    return Char{0};
 }
 
 unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, ArrowHandler &arrowHandler, unsigned char c) {
@@ -72,13 +72,14 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
         switch (arrow.value()) {
             case Arrow::right:
                 printBuffer = history.get().substr(buffer.getPosition());
-                return c;
+                break;
             case Arrow::left:
                 buffer.move(-1);
-                return c;
+                break;
             default:
-                return c;
+                break;
         }
+        return c;
     }
     auto handler = handlers[c];
     CharOpt cReturned;

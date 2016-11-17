@@ -30,11 +30,11 @@ static thread_local PrintBuffer printBuffer(defaultPrintBufferSize);
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 static thread_local ReadSignature realRead = nullptr;
 
-static inline bool is_terminal_input(int fd) {
+static bool is_terminal_input(int fd) {
     return isatty(fd) && fd == 0;
 }
 
-static inline void putCharToReadBuffer(char *buf) {
+static void putCharToReadBuffer(char *buf) {
     auto c = printBuffer.getNextChar();
     if (c) {
         *buf = c.value();
@@ -54,7 +54,7 @@ ssize_t read(int fd, void *buf, size_t count) {
     return returnValue;
 }
 
-static inline void loadHistory() {
+static void loadHistory() {
     std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
     if (!historyFile.is_open()) {
         throw std::runtime_error{"Could not open history file"};
@@ -63,7 +63,7 @@ static inline void loadHistory() {
     historyFile.close();
 }
 
-static inline void createGlobals() {
+static void createGlobals() {
     historySuggestion = std::make_unique<HistorySuggestion>(history);
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);

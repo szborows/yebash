@@ -38,7 +38,7 @@ public:
                     })).length() + 1);
     }
 
-    inline ArrowOpt handle(unsigned char c) {
+    ArrowOpt handle(unsigned char c) {
         currentState_ += c;
         for (auto it = escapeCodes_.begin(); it != escapeCodes_.end(); ++it) {
             auto arrow = std::get<0>(*it);
