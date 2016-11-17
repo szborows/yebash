@@ -10,10 +10,10 @@ namespace {
 void testArrow(ArrowHandler &handler, char c, ArrowHandler::ArrowOpt a) {
     auto result = handler.handle(0x1b);
     REQUIRE(result.operator bool() == true);
-    REQUIRE(result.value() == Arrow::no);
+    REQUIRE(result.value() == Arrow::invalid);
     result = handler.handle('[');
     REQUIRE(result.operator bool() == true);
-    REQUIRE(result.value() == Arrow::no);
+    REQUIRE(result.value() == Arrow::invalid);
     result = handler.handle(c);
     REQUIRE(result == a);
 }

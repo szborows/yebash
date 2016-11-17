@@ -10,11 +10,11 @@
 namespace yb {
 
 enum class Arrow {
-    no,
     left,
     up,
     right,
-    down
+    down,
+    invalid
 };
 
 class ArrowHandler final {
@@ -48,7 +48,7 @@ public:
                     currentState_.clear();
                     return arrow;
                 }
-                return Arrow::no;
+                return Arrow::invalid;
             }
         }
         currentState_.clear();
