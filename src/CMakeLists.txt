@@ -4,6 +4,9 @@ set(SOURCES
     History.cpp
     HistorySuggestion.cpp
     Printer.cpp
+    LineBuffer.cpp
+    PrintBuffer.cpp
+    ArrowHandler.cpp
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "-shared -fPIC ${CMAKE_EXE_LINKER_FLAGS}")
