@@ -2,6 +2,11 @@
 
 namespace yb {
 
+HistorySuggestion::HistorySuggestion(const History &history)
+        : history_(history) {
+    position_ = history_.begin();
+}
+
 StringOpt HistorySuggestion::find(const std::string &pattern, History::const_iterator start) {
     for (auto it = start; it != history_.end(); ++it) {
         if (it->compare(0, pattern.length(), pattern) == 0) {
