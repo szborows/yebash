@@ -12,7 +12,7 @@ set(SOURCES
     yebash.cpp)
 
 add_executable(tests ${SOURCES})
-target_link_libraries(tests yebash gcov)
+target_link_libraries(tests yebash)
 
 add_custom_target(tests-run DEPENDS tests COMMAND ./tests)
 
