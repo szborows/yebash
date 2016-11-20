@@ -2,21 +2,28 @@ sudo: required
 
 language: cpp
 
+before_install:
+    - docker pull mrokkk/devel
+
 matrix:
     include:
         - env:
             - COMPILER=g++
             - JOB=coverage
+            - IMAGE=mrokkk/devel
+            - CODECOV=1
           services:
             - docker
         - env:
-            - COMPILER=clang++-3.8
-              JOB=coverage
+            - COMPILER=clang++
+            - JOB=coverage
+            - IMAGE=mrokkk/devel
           services:
             - docker
         - env:
             - COMPILER=g++
-              JOB=valgrind
+            - JOB=valgrind
+            - IMAGE=mrokkk/devel
           services:
             - docker
 

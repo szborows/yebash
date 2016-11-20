@@ -4,12 +4,11 @@ set -e
 
 dir=$1
 job=$2
-export CXX=$COMPILER
 
 mkdir -p build
 cd build
 
-cores=1
+cores=$(nproc)
 
 case "$job" in
     "valgrind")
@@ -20,6 +19,12 @@ case "$job" in
         make tests-cov -j$cores ;;
     *)
         cmake $dir
-        make tests-run ;;
+        make tests-run -j$cores ;;
 esac
+
+set -x
+
+if [ $CODECOV ]; then
+    codecov --root $dir --gcov-root . --required
+fi
 
