@@ -2,29 +2,23 @@
 
 set -e
 
-dir=$1
-job=$2
+dir=$(dirname $0)
 
+cd $dir
 mkdir -p build
 cd build
 
 cores=$(nproc)
 
-case "$job" in
+case "$JOB" in
     "valgrind")
-        cmake $dir
+        cmake ..
         make tests-valgrind -j$cores ;;
     "coverage")
-        cmake -DCOVERAGE=ON $dir
+        cmake -DCOVERAGE=ON ..
         make tests-cov -j$cores ;;
     *)
-        cmake $dir
+        cmake ..
         make tests-run -j$cores ;;
 esac
-
-set -x
-
-if [ $CODECOV ]; then
-    codecov --root $dir --gcov-root . --required
-fi
 

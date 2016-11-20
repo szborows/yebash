@@ -2,5 +2,5 @@
 
 set -e
 
-docker run -t -e "TERM=xterm-256color" -v $(pwd):/repo $IMAGE /bin/bash -c "CODECOV=$CODECOV CXX=$COMPILER /repo/run_tests.sh /repo $JOB"
+docker run -t -v $PWD:$PWD $IMAGE /bin/bash -c "CXX=$COMPILER JOB=$JOB $PWD/run_tests.sh"
 

@@ -28,6 +28,10 @@ matrix:
             - docker
 
 language: cpp
+
 script:
     - ./ci.sh
+
+after_success:
+    - "if [ \"$CODECOV\" ]; then bash <(curl -s https://codecov.io/bash); fi"
 
