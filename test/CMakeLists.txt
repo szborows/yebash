@@ -17,13 +17,22 @@ target_link_libraries(tests yebash)
 add_custom_target(tests-run DEPENDS tests COMMAND ./tests)
 
 if (COVERAGE)
-    add_custom_target(clean-coverage COMMAND find ${CMAKE_BINARY_DIR} -name '*.gcda' -exec rm {} \\\; )
-    add_custom_target(tests-cov
-        DEPENDS clean-coverage tests-run
-        COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} -e main.cpp)
-    add_custom_target(tests-cov-html
-        DEPENDS clean-coverage tests-run
-        COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} -e main.cpp --html --html-details -o tests.html)
+    add_custom_target(clean-coverage COMMAND find ${CMAKE_BINARY_DIR} -name '*.gcda' -exec rm {} "\;" DEPENDS tests)
+    add_dependencies(tests-run clean-coverage)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        add_custom_target(tests-cov
+            DEPENDS tests-run
+            COMMAND LLVM_PROFILE_FILE=tests.profdata ./tests
+            COMMAND llvm-profdata merge -instr tests.profdata -o merged.profdata
+            COMMAND llvm-cov report ./tests -instr-profile=merged.profdata)
+    else()
+        add_custom_target(tests-cov
+            DEPENDS tests-run
+            COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} -e main.cpp)
+        add_custom_target(tests-cov-html
+            DEPENDS tests-run
+            COMMAND gcovr -r ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} -e main.cpp --html --html-details -o tests.html)
+    endif()
 endif()
 
 add_custom_target(tests-valgrind
