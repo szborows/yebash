@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <boost/property_tree/ini_parser.hpp>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include "yebash.hpp"
 #include "Defs.hpp"
@@ -70,9 +73,28 @@ static void createGlobals() {
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
 }
 
+static auto readConfiguration() {
+    passwd *pw = getpwuid(getuid());
+    std::string const configFile = std::string{pw->pw_dir} + "/.yebash.cfg";
+
+    namespace pt = boost::property_tree;
+    try {
+        pt::ptree tree;
+        pt::ini_parser::read_ini(configFile, tree);
+        tree.get<std::string>("color.completion");
+    }
+    catch(pt::ini_parser::ini_parser_error const&) {
+        return; // config file doesn't exist
+    }
+    catch (pt::ptree_bad_path const&) {
+        return; // no color.completion in config file
+    }
+}
+
 __attribute__((constructor))
 static void yebashInit()  {
     realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+    readConfiguration();
     loadHistory();
     createGlobals();
 }
