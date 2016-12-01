@@ -1,4 +1,5 @@
 #include "LineBuffer.hpp"
+#include <algorithm>
 
 namespace yb {
 
@@ -27,7 +28,13 @@ void LineBuffer::remove() {
 }
 
 void LineBuffer::move(int n) {
-    position_ += n;
+    auto begin = std::begin(buffer_);
+    if (n < 0 && std::distance(begin, position_) < -n) {
+        position_ = begin;
+    }
+    else {
+        position_ += n;
+    }
 }
 
 size_t LineBuffer::getPosition() const {
