@@ -23,6 +23,7 @@ public:
     void move(int n);
     size_t getPosition() const;
     char getChar() const;
+    bool empty() const;
 
 };
 

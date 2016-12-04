@@ -7,13 +7,7 @@ PrintBuffer::PrintBuffer(size_t size) {
     position_ = buffer_.end();
 }
 
-PrintBuffer &PrintBuffer::operator =(std::string &&s) {
-    buffer_ = s;
-    position_ = buffer_.begin();
-    return *this;
-}
-
-PrintBuffer &PrintBuffer::operator =(std::string &s) {
+PrintBuffer &PrintBuffer::operator =(const std::string &s) {
     buffer_ = s;
     position_ = buffer_.begin();
     return *this;

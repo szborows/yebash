@@ -38,5 +38,9 @@ char LineBuffer::getChar() const {
     return *position_;
 }
 
+bool LineBuffer::empty() const {
+    return buffer_.empty();
+}
+
 } // namespace yb
 
