@@ -63,6 +63,9 @@ ssize_t read(int fd, void *buf, size_t count) {
 
 int pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timespec *timeout, const sigset_t *sigmask) {
     int returnValue;
+    if (FD_ISSET(0, readfds)) {
+        if (!printBuffer.empty()) return 0;
+    }
     returnValue = realPSelect(nfds, readfds, writefds, exceptfds, timeout, sigmask);
     return returnValue;
 }
