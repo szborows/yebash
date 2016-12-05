@@ -3,6 +3,12 @@
 
 using namespace yb;
 
+TEST_CASE( "can create empty LineBuffer", "[LineBuffer.empty]") {
+    LineBuffer buf;
+    REQUIRE(buf.empty());
+    REQUIRE(buf.getPosition() == 0);
+}
+
 TEST_CASE( "can insert a char to the empty LineBuffer", "[LineBuffer.insert]" ) {
     auto testCharacter = [=] (char c) {
         LineBuffer buf;
@@ -11,6 +17,7 @@ TEST_CASE( "can insert a char to the empty LineBuffer", "[LineBuffer.insert]" ) 
         REQUIRE(buf.getChar() == 0);
         REQUIRE(buf.getPosition() == 1);
         REQUIRE(result == std::string{c});
+        REQUIRE_FALSE(buf.empty());
     };
     std::string domain = "abcdefghijklmnopqrstuvwxyz01234567890-_";
     for_each(domain.begin(), domain.end(), testCharacter);
