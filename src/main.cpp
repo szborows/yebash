@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <sys/select.h>
 
 #include "yebash.hpp"
 #include "Defs.hpp"
@@ -31,6 +32,8 @@ thread_local PrintBuffer printBuffer(defaultPrintBufferSize);
 
 using ReadSignature = ssize_t (*)(int, void*, size_t);
 thread_local ReadSignature realRead = nullptr;
+using PSelectSignature = int (*)(int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
+thread_local PSelectSignature realPSelect = nullptr;
 
 bool is_terminal_input(int fd) {
     return isatty(fd) && fd == 0;
@@ -58,6 +61,12 @@ ssize_t read(int fd, void *buf, size_t count) {
     return returnValue;
 }
 
+int pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timespec *timeout, const sigset_t *sigmask) {
+    int returnValue;
+    returnValue = realPSelect(nfds, readfds, writefds, exceptfds, timeout, sigmask);
+    return returnValue;
+}
+
 void loadHistory() {
     std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
     if (!historyFile.is_open()) {
@@ -77,6 +86,7 @@ void createGlobals() {
 __attribute__((constructor))
 void yebashInit()  {
     realRead = reinterpret_cast<ReadSignature>(dlsym(RTLD_NEXT, "read"));
+    realPSelect = reinterpret_cast<PSelectSignature>(dlsym(RTLD_NEXT, "pselect"));
     loadHistory();
     createGlobals();
 }
