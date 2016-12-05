@@ -47,29 +47,6 @@ void putCharToReadBuffer(char *buf) {
     }
 }
 
-} // namespace anon
-
-ssize_t read(int fd, void *buf, size_t count) {
-    if (is_terminal_input(fd) && !printBuffer.empty()) {
-        putCharToReadBuffer(static_cast<char *>(buf));
-        return 1;
-    }
-    auto returnValue = realRead(fd, buf, count);
-    if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
-    }
-    return returnValue;
-}
-
-int pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timespec *timeout, const sigset_t *sigmask) {
-    int returnValue;
-    if (FD_ISSET(0, readfds)) {
-        if (!printBuffer.empty()) return 0;
-    }
-    returnValue = realPSelect(nfds, readfds, writefds, exceptfds, timeout, sigmask);
-    return returnValue;
-}
-
 void loadHistory() {
     std::ifstream historyFile(std::string{getenv("HOME")} + "/.bash_history");
     if (!historyFile.is_open()) {
@@ -92,5 +69,28 @@ void yebashInit()  {
     realPSelect = reinterpret_cast<PSelectSignature>(dlsym(RTLD_NEXT, "pselect"));
     loadHistory();
     createGlobals();
+}
+
+} // namespace anon
+
+ssize_t read(int fd, void *buf, size_t count) {
+    if (is_terminal_input(fd) && !printBuffer.empty()) {
+        putCharToReadBuffer(static_cast<char *>(buf));
+        return 1;
+    }
+    auto returnValue = realRead(fd, buf, count);
+    if (is_terminal_input(fd)) {
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
+    }
+    return returnValue;
+}
+
+int pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timespec *timeout, const sigset_t *sigmask) {
+    int returnValue;
+    if (FD_ISSET(0, readfds)) {
+        if (!printBuffer.empty()) return 0;
+    }
+    returnValue = realPSelect(nfds, readfds, writefds, exceptfds, timeout, sigmask);
+    return returnValue;
 }
 
