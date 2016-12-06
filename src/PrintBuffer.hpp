@@ -16,8 +16,7 @@ class PrintBuffer final {
 public:
 
     explicit PrintBuffer(size_t size = 1024);
-    PrintBuffer &operator =(std::string &&s);
-    PrintBuffer &operator =(std::string &s);
+    PrintBuffer &operator =(const std::string &s);
     CharOpt getNextChar();
     bool empty() const;
     bool operator==(const char *a) const;
