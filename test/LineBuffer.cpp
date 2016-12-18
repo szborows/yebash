@@ -78,3 +78,11 @@ TEST_CASE( "can move in buffer and insert/delete characters", "[LineBuffer.move]
     REQUIRE(std::string{buf.get()} == "abzxdc");
 }
 
+TEST_CASE( "moving backwards can't break LineBuffer", "[LineBuffer.moveCantBreak]") {
+    LineBuffer buf;
+    for (int i = 0; i < 1025; ++i) {
+        buf.move(-i);
+        REQUIRE(buf.getPosition() == 0);
+    }
+}
+
