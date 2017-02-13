@@ -49,5 +49,9 @@ bool LineBuffer::empty() const {
     return buffer_.empty();
 }
 
+void LineBuffer::setCharLength(unsigned len) {
+    lengths_[std::distance(std::begin(buffer_        position_] = len;
+}
+
 } // namespace yb
 

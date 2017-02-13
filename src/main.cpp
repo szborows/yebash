@@ -11,6 +11,7 @@
 #include "HistorySuggestion.hpp"
 #include "Printer.hpp"
 #include "ArrowHandler.hpp"
+#include "UnicodeHandler.hpp"
 #include "LineBuffer.hpp"
 #include "EscapeCodeGenerator.hpp"
 #include "PrintBuffer.hpp"
@@ -27,6 +28,7 @@ thread_local std::unique_ptr<HistorySuggestion> historySuggestion = nullptr;
 thread_local std::unique_ptr<EscapeCodeGenerator> escapeCodeGenerator = nullptr;
 thread_local std::unique_ptr<Printer> printer = nullptr;
 thread_local std::unique_ptr<ArrowHandler> arrowHandler = nullptr;
+thread_local std::unique_ptr<UnicodeHandler> unicodeHandler = nullptr;
 thread_local LineBuffer lineBuffer(defaultLineBufferSize);
 thread_local PrintBuffer printBuffer(defaultPrintBufferSize);
 
@@ -61,6 +63,7 @@ void createGlobals() {
     escapeCodeGenerator = std::make_unique<ANSIEscapeCodeGenerator>();
     printer = std::make_unique<Printer>(std::cout, *escapeCodeGenerator);
     arrowHandler = std::make_unique<ArrowHandler>(*escapeCodeGenerator);
+    unicodeHandler = std::make_unique<UnicodeHandler>();
 }
 
 __attribute__((constructor))
@@ -80,8 +83,9 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     auto returnValue = realRead(fd, buf, count);
     if (is_terminal_input(fd)) {
-        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, lineBuffer, printBuffer, *arrowHandler, *static_cast<unsigned char *>(buf));
+        *static_cast<unsigned char *>(buf) = yb::yebash(*historySuggestion, *printer, lineBuffer, printBuffer, *arrowHandler, *unicodeHandler, *static_cast<unsigned char *>(buf));
     }
+
     return returnValue;
 }
 

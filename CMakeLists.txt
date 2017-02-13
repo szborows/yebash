@@ -19,6 +19,6 @@ set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -Werror -Wextra ${ADDITIONAL_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${ADDITIONAL_LD_FLAGS}")
 
 add_subdirectory(src)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 install(FILES bin/yebash DESTINATION bin PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)

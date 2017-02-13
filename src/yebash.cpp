@@ -6,7 +6,6 @@
 #include "HistorySuggestion.hpp"
 #include "Defs.hpp"
 #include "Printer.hpp"
-#include "ArrowHandler.hpp"
 #include "LineBuffer.hpp"
 #include "KeyHandlers.hpp"
 #include "PrintBuffer.hpp"
@@ -63,7 +62,7 @@ CharOpt nextSuggestionHandler(HistorySuggestion &history, Printer &printer, Line
     return Char{0};
 }
 
-unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, ArrowHandler &arrowHandler, unsigned char c) {
+unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &buffer, PrintBuffer &printBuffer, ArrowHandler &arrowHandler, UnicodeHandler & unicodeHandler, unsigned char c) {
     // TODO: uncomment later
     //if (!getenv("YEBASH"))
     //    return;
@@ -83,6 +82,9 @@ unsigned char yebash(HistorySuggestion &history, Printer &printer, LineBuffer &b
         }
         return c;
     }
+    const unsigned numBytes = unicodeHandler.handle(c);
+    buffer.setCharLength(numBytes);
+
     auto handler = handlers[c];
     CharOpt cReturned;
     if (handler) {

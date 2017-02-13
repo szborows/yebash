@@ -7,6 +7,7 @@ set(SOURCES
     LineBuffer.cpp
     PrintBuffer.cpp
     ArrowHandler.cpp
+    UnicodeHandler.cpp
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "-shared -fPIC ${CMAKE_EXE_LINKER_FLAGS}")
